@@ -1,0 +1,24 @@
+#!/bin/bash
+# Ouvre CrateSort dans sa propre fenêtre avec Chrome, Edge ou Brave.
+# L'outil est cherché dans l'app (Contents/Resources) puis à côté de l'app.
+APP="$(cd "$(dirname "$0")/../.." && pwd)"
+HTML="$APP/Contents/Resources/CrateSort.html"
+[ -f "$HTML" ] || HTML="$(dirname "$APP")/CrateSort.html"
+if [ ! -f "$HTML" ]; then
+  osascript -e 'display dialog "CrateSort.html est introuvable. Placez-le à côté de l'\''application." buttons {"OK"} with title "CrateSort" with icon stop' >/dev/null 2>&1
+  exit 1
+fi
+URL="file://$(printf '%s' "$HTML" | sed -e 's/%/%25/g' -e 's/ /%20/g')"
+for B in "Google Chrome.app/Contents/MacOS/Google Chrome" \
+         "Microsoft Edge.app/Contents/MacOS/Microsoft Edge" \
+         "Brave Browser.app/Contents/MacOS/Brave Browser"; do
+  for D in "/Applications" "$HOME/Applications"; do
+    if [ -x "$D/$B" ]; then
+      nohup "$D/$B" --app="$URL" >/dev/null 2>&1 &
+      exit 0
+    fi
+  done
+done
+R=$(osascript -e 'button returned of (display dialog "CrateSort a besoin de Google Chrome (ou Microsoft Edge / Brave) pour accéder à vos dossiers de musique. Safari et Firefox ne sont pas compatibles. Vous pouvez aussi utiliser l'\''application autonome (dossier desktop)." buttons {"Annuler","Télécharger Chrome"} default button 2 with title "CrateSort" with icon caution)' 2>/dev/null)
+[ "$R" = "Télécharger Chrome" ] && open "https://www.google.com/chrome/"
+exit 0
