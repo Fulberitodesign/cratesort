@@ -85,10 +85,11 @@ for(const [k,fn] of Object.entries(H))ipcMain.handle('fs:'+k,async(e,...a)=>{
 let win;
 function createWindow(){
   win=new BrowserWindow({
-    width:1440,height:900,minWidth:980,minHeight:640,
-    title:'CrateSort',backgroundColor:'#0c0d11',
+    width:1440,height:900,minWidth:980,minHeight:640,show:false,
+    title:'CrateSort',backgroundColor:'#0b0c0f',
     webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:true,preload:path.join(__dirname,'preload.js')}
   });
+  win.once('ready-to-show',()=>win.show()); // la fenêtre apparaît une fois le thème choisi appliqué (pas de flash)
   win.loadFile(path.join(__dirname,'CrateSort.html'));
   win.webContents.setWindowOpenHandler(({url})=>{shell.openExternal(url);return{action:'deny'}});
   win.webContents.on('will-navigate',(e,url)=>{if(!url.startsWith('file:')){e.preventDefault();shell.openExternal(url)}});
