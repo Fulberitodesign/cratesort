@@ -4,13 +4,15 @@ Outil de rangement de morceaux pour DJ : écoutez vos nouveaux téléchargements
 
 ## Fonctionnalités
 
+- **Nouvelle interface (2.2)** : barre latérale avec deux pages, « Ranger » (téléchargements + bibliothèque côte à côte) et « Bibliothèque » (pleine largeur), compteurs « à ranger », « rangés » et « doublons ».
+- **Bibliothèque en colonnes** (style Finder, affichage par défaut) : Dossier › Sous-dossier › Sous-dossier 1 › Sous-dossier 2…, avec fil d'Ariane cliquable et écoute des morceaux déjà rangés. L'arborescence reste disponible.
+- **Apparence au choix** : 9 couleurs principales ou une couleur personnalisée, et 4 fonds (Sombre, Noir, Nuit, Clair). Le choix est mémorisé.
 - **Écoute rapide** : forme d'onde cliquable, ←/→ ±10 s, détection automatique du drop (touche D), départ au drop, enchaînement automatique.
 - **Rangement au clavier** : Maj+1…9 vers vos dossiers favoris, Suppr pour rejeter (`_Rejetes`, rien n'est effacé), Ctrl/⌘+Z pour annuler.
 - **Infos DJ** : BPM (lu dans les tags ou estimé), tonalité en notation Camelot, genre, durée, détection des doublons.
 - **Morceaux compatibles** (H) : tonalité voisine et BPM à ±6 %.
 - **Lots de couleurs** liés à des dossiers, rangés en un clic.
 - **Nettoyage des noms** en « Artiste - Titre » (sites, FREE DOWNLOAD, numéros de piste retirés).
-- **Bibliothèque en arborescence ou en colonnes** (style Finder), avec écoute des morceaux déjà rangés.
 - **Export de playlist** `.m3u8` (Serato, Rekordbox, Traktor, VirtualDJ) et `.csv`.
 
 ## Utilisation

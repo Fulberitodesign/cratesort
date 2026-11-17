@@ -1,7 +1,7 @@
 {
   "name": "cratesort",
   "productName": "CrateSort",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Rangement de morceaux pour DJ",
   "main": "main.js",
   "private": true,

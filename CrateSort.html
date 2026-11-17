@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CrateSort — Rangement de morceaux pour DJ</title>
+<link rel="icon" id="favicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23c6f04b'/><g transform='translate(4 3.4)' fill='none' stroke='%23131a03' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='9.5' r='6.8'/><circle cx='12' cy='9.5' r='2.4'/><path d='M3 13h18v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z' fill='%23c6f04b'/><path d='M9.5 17h5'/></g></svg>">
 <script>try{var t=JSON.parse(localStorage.getItem('cs.theme')||'{}'),r=document.documentElement;if(t.bg&&t.bg!=='sombre')r.dataset.bg=t.bg;if(t.a){r.style.setProperty('--a',t.a);r.style.setProperty('--a-ink',t.ink||'#131a03')}}catch(e){}</script>
 <style>
 :root{
@@ -45,7 +46,7 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 #side{width:232px;flex:none;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:26px 16px 16px;gap:26px}
 .brand{display:flex;align-items:center;gap:13px;padding:0 8px}
 .logo{width:44px;height:44px;border-radius:12px;background:var(--a);display:grid;place-items:center;flex:none;color:var(--a-ink)}
-.logo svg{width:24px;height:24px}
+.logo svg{width:26px;height:26px}.logo .crate{fill:var(--a)}
 .brand b{font-size:19px;letter-spacing:-.2px;display:block;line-height:1.15}
 .brand span{color:var(--muted);font-size:13px}
 #side nav{display:flex;flex-direction:column;gap:4px}
@@ -299,7 +300,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
 
 <div id="app">
 <aside id="side">
-  <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="5.5"/><circle cx="12" cy="8.5" r="1.2" fill="currentColor"/><path d="M3 13.5h18V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9.5 17h5"/></svg></div><div><b>CrateSort</b><span>pour DJ</span></div></div>
+  <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.8"/><circle cx="12" cy="9.5" r="2.4"/><path class="crate" d="M3 13h18v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9.5 17h5"/></svg></div><div><b>CrateSort</b><span>pour DJ</span></div></div>
   <nav>
     <button class="nav on" data-page="sort" title="Ranger les nouveaux morceaux"><svg class="i" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span>Ranger</span><em class="cnt" id="navTodo">0</em></button>
     <button class="nav" data-page="lib" title="Parcourir la bibliothèque en colonnes"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg><span>Bibliothèque</span><em class="cnt" id="navLib" style="display:none"></em></button>
@@ -545,8 +546,15 @@ function applyTheme(t,save,live){
   const cs=getComputedStyle(r);
   TH.light=TH.bg==='clair';TH.line=cs.getPropertyValue('--line').trim();TH.text=cs.getPropertyValue('--text').trim();
   if(save)ls.set('cs.theme',{a:TH.a,bg:TH.bg,ink:inkFor(TH.a)});
+  setFavicon();
   if($('#theme').style.display==='grid'&&!live)renderTheme();
   if(S.inbox)rerender();if(S.playing)setPlayerInfo(S.playing);drawWave();
+}
+/* Icône d'onglet aux couleurs du thème */
+function setFavicon(){
+  const a=TH.a,k=inkFor(TH.a);
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='${a}'/><g transform='translate(4 3.4)' fill='none' stroke='${k}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='9.5' r='6.8'/><circle cx='12' cy='9.5' r='2.4'/><path d='M3 13h18v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z' fill='${a}'/><path d='M9.5 17h5'/></g></svg>`;
+  $('#favicon').href='data:image/svg+xml,'+encodeURIComponent(svg);
 }
 function renderTheme(){
   const known=ACCENTS.some(x=>x[0]===TH.a);
