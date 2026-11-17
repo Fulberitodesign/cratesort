@@ -6,15 +6,76 @@
   "main": "main.js",
   "private": true,
   "author": "Fulberitodesign",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fulberitodesign/cratesort.git"
+  },
   "scripts": {
     "sync": "node scripts/sync.js",
     "start": "npm run sync && electron .",
-    "build:mac": "npm run sync && electron-packager . CrateSort --platform=darwin --arch=x64 --icon=assets/CrateSort.icns --app-bundle-id=local.cratesort.app --app-category-type=public.app-category.music --out=dist --overwrite --asar --ignore=^/dist --ignore=^/scripts --ignore=^/assets --ignore=^/node_modules",
-    "build:mac-arm": "npm run sync && electron-packager . CrateSort --platform=darwin --arch=arm64 --icon=assets/CrateSort.icns --app-bundle-id=local.cratesort.app --app-category-type=public.app-category.music --out=dist --overwrite --asar --ignore=^/dist --ignore=^/scripts --ignore=^/assets --ignore=^/node_modules",
-    "build:win": "npm run sync && electron-packager . CrateSort --platform=win32 --arch=x64 --icon=assets/CrateSort.ico --win32metadata.ProductName=CrateSort --win32metadata.FileDescription=CrateSort --out=dist --overwrite --asar --ignore=^/dist --ignore=^/scripts --ignore=^/assets --ignore=^/node_modules"
+    "build:win": "npm run sync && electron-builder --win --publish never",
+    "build:mac": "npm run sync && electron-builder --mac --publish never"
   },
   "devDependencies": {
-    "@electron/packager": "20.3.0",
-    "electron": "43.7.7"
+    "electron": "43.7.7",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "local.cratesort.app",
+    "productName": "CrateSort",
+    "copyright": "Fulberitodesign",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "CrateSort.html",
+      "package.json"
+    ],
+    "asar": true,
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "assets/CrateSort.icns",
+      "category": "public.app-category.music",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "artifactName": "CrateSort-Mac.${ext}"
+    },
+    "dmg": {
+      "title": "CrateSort ${version}",
+      "writeUpdateInfo": false
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/CrateSort.ico",
+      "artifactName": "CrateSort-Windows.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "CrateSort",
+      "deleteAppDataOnUninstall": false,
+      "differentialPackage": false
+    }
   }
 }
