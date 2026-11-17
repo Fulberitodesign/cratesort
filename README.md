@@ -59,7 +59,7 @@ npm run build:mac    # sous macOS   → desktop/dist/CrateSort-Mac.dmg (puce App
 
 `CrateSort.html` à la racine est la source unique : `npm start` et les builds la copient automatiquement dans `desktop/`.
 
-**Publier une nouvelle version** : changez `version` dans `desktop/package.json`, puis poussez un tag du même numéro (par exemple `git tag v2.3.0 && git push origin v2.3.0`). GitHub Actions construit alors le `.exe` et le `.dmg` sur de vrais Windows et Mac, puis les met sur la page Releases (`.github/workflows/installateurs.yml`).
+**Publier une nouvelle version** : changez `version` dans `desktop/package.json`, puis sur GitHub ouvrez **Releases → Draft a new release**, créez le tag du même numéro (par exemple `v2.3.0`) et cliquez sur **Publish release**. Pousser le tag depuis un terminal (`git push origin v2.3.0`) fonctionne aussi. GitHub Actions construit alors le `.exe` et le `.dmg` sur de vrais Windows et Mac, puis les ajoute à la version (`.github/workflows/installateurs.yml`).
 
 Les installateurs ne sont pas signés (le Mac reçoit une signature ad hoc). Pour supprimer les avertissements à l'installation, il faudrait un compte Apple Developer et un certificat de signature Windows.
 

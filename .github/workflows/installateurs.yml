@@ -1,11 +1,19 @@
 # Construit l'installateur Windows (.exe) et l'image Mac (.dmg),
-# puis les publie sur la page « Releases » quand on pousse un tag de version (ex. v2.2.0).
+# puis les ajoute à la version publiée sur la page « Releases ».
+# Déclencheurs : publication d'une Release sur GitHub (un clic), ou tag de version poussé (ex. v2.2.0).
 name: Installateurs
 
 on:
+  release:
+    types: [published]
   push:
     tags: ["v*"]
   workflow_dispatch:
+
+# Une seule publication à la fois par version (une Release crée aussi son tag)
+concurrency:
+  group: installateurs-${{ github.event.release.tag_name || github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -43,7 +51,7 @@ jobs:
           if-no-files-found: error
 
   publier:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
     needs: construire
     runs-on: ubuntu-latest
     steps:
@@ -52,11 +60,18 @@ jobs:
         with:
           path: installateurs
           merge-multiple: true
-      - name: Créer la version sur la page Releases
+      - name: Ajouter les installateurs à la version
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || github.ref_name }}
         run: |
-          gh release create "$GITHUB_REF_NAME" installateurs/* \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "CrateSort ${GITHUB_REF_NAME#v}" \
-            --notes-file .github/notes-de-version.md
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" installateurs/* --clobber --repo "$GITHUB_REPOSITORY"
+            # Description vide : on met les instructions d'installation
+            if [ -z "$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body)" ]; then
+              gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file .github/notes-de-version.md
+            fi
+          else
+            gh release create "$TAG" installateurs/* --repo "$GITHUB_REPOSITORY" \
+              --title "CrateSort ${TAG#v}" --notes-file .github/notes-de-version.md
+          fi
