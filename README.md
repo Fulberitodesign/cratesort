@@ -22,7 +22,7 @@ Ces avertissements viennent de ce que l'application n'est pas signée par Apple 
 ## Fonctionnalités
 
 - **Nouvelle interface (2.2)** : barre latérale avec deux pages, « Ranger » (téléchargements + bibliothèque côte à côte) et « Bibliothèque » (pleine largeur), compteurs « à ranger », « rangés » et « doublons ».
-- **Bibliothèque en colonnes** (style Finder, affichage par défaut) : Dossier › Sous-dossier › Sous-dossier 1 › Sous-dossier 2…, avec fil d'Ariane cliquable et écoute des morceaux déjà rangés. L'arborescence reste disponible.
+- **Bibliothèque en colonnes** (style Finder, affichage par défaut) : Dossier › Sous-dossier › Sous-dossier 1 › Sous-dossier 2…, avec fil d'Ariane cliquable et écoute des morceaux déjà rangés. L'arborescence reste disponible. Largeur des colonnes réglable à la main (glisser le bord, double-clic pour ajuster au contenu, Alt+glisser pour toutes), mémorisée ; bouton « Largeur auto » pour revenir au réglage automatique.
 - **Mises à jour automatiques (2.3)** : sur Windows, la nouvelle version se télécharge en arrière-plan et s'installe au redémarrage. Sur Mac, CrateSort signale la nouvelle version et propose de télécharger le `.dmg`. Désactivable dans Réglages.
 - **Apparence au choix** : 9 couleurs principales ou une couleur personnalisée, et 4 fonds (Sombre, Noir, Nuit, Clair). Le choix est mémorisé.
 - **Écoute rapide** : forme d'onde cliquable, ←/→ ±10 s, détection automatique du drop (touche D), départ au drop, enchaînement automatique.

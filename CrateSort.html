@@ -260,7 +260,12 @@ button.on{border-color:var(--a);color:var(--a-text);background:var(--a-soft)}
 
 /* ---------- Bibliothèque en colonnes (style Finder) ---------- */
 #tree.cols{display:flex;overflow-x:auto;overflow-y:hidden;align-items:stretch;scroll-behavior:smooth}
-.col{flex:none;width:var(--colw,236px);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.col{flex:none;width:var(--colw,236px);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;position:relative}
+.colrs{position:absolute;top:0;bottom:0;right:-5px;width:10px;cursor:col-resize;z-index:3;touch-action:none}
+.colrs:after{content:"";position:absolute;top:0;bottom:0;left:4px;width:2px;background:transparent;transition:background .12s}
+.colrs:hover:after,.colrs.on:after{background:var(--a)}
+#tree.resizing,#tree.resizing *{cursor:col-resize!important;user-select:none}
+#colAuto{display:none}#colAuto.show{display:inline-block}
 .col:last-child{border-right:0}
 .colh{padding:10px 14px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);display:flex;gap:6px;white-space:nowrap;align-items:baseline}
 .colh b{font-weight:650;overflow:hidden;text-overflow:ellipsis;color:var(--text2)}
@@ -364,7 +369,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
   <section class="pane" id="right">
     <div class="phead">
       <div class="ptitle"><span class="dot b"></span>Bibliothèque <small id="libName"></small></div>
-      <div class="pact"><button id="viewBtn" title="Changer l'affichage : colonnes ou arborescence">☰ Arborescence</button><button id="pickLib">Choisir le dossier</button><button class="icon" id="refLib" title="Réanalyser">↻</button></div>
+      <div class="pact"><button id="colAuto" title="Revenir à la largeur automatique des colonnes">↔ Largeur auto</button><button id="viewBtn" title="Changer l'affichage : colonnes ou arborescence">☰ Arborescence</button><button id="pickLib">Choisir le dossier</button><button class="icon" id="refLib" title="Réanalyser">↻</button></div>
     </div>
     <div class="tools"><input type="search" id="fq" placeholder="Chercher un dossier (ex : house 2025)…  [ / ]"></div>
     <div id="chips"></div>
@@ -613,7 +618,8 @@ function setPage(pg){
   document.body.classList.toggle('pg-lib',S.page==='lib');
   document.querySelectorAll('.nav[data-page]').forEach(b=>b.classList.toggle('on',b.dataset.page===S.page));
   $('#pageT').textContent=PAGES[S.page][0];$('#pageS').textContent=PAGES[S.page][1];
-  if(S.page==='lib'&&S.libView!=='cols'){S.libView='cols';renderFolders()}
+  if(S.page==='lib'&&S.libView!=='cols')S.libView='cols';
+  if(S.root)renderFolders(); // chaque page a ses propres largeurs de colonnes
   requestAnimationFrame(()=>{const t=$('#tree');if(t.classList.contains('cols'))fitCols(t);drawWave()});
 }
 function applySplit(){
@@ -1305,13 +1311,28 @@ function renderCols(box){
     h+=fl.slice(0,500).map(n=>`<div class="lf${pl&&pl.libPath===f.path&&pl.name===n?' playing':''}" data-p="${esc(f.path)}" data-n="${esc(n)}" title="${esc(n)} — clic pour écouter"><button class="pbtn">${pl&&pl.libPath===f.path&&pl.name===n&&!audio.paused?'❚❚':'▶'}</button><span class="nm">${esc(n.replace(/\.[^.]+$/,''))}</span><span class="ext">${esc(n.split('.').pop())}</span></div>`).join('');
     if(fl.length>500)h+=`<div class="colnote">… et ${fl.length-500} autres morceaux</div>`;
     if(!h)h='<div class="colnote">Dossier vide</div>';
-    return `<div class="col" data-p="${esc(f.path)}"><div class="colh"><b title="${esc(f.path||f.name)}">${esc(ci?f.name:f.name+' · racine')}</b><span>${f.total||''}</span></div><div class="colb">${h}</div></div>`;
+    const mw=colW(ci);
+    return `<div class="col" data-p="${esc(f.path)}" data-i="${ci}"${mw?` style="width:${mw}px"`:''}><div class="colrs" title="Glisser : ajuster la largeur · double-clic : ajuster au contenu · Alt+glisser : toutes les colonnes"></div><div class="colh"><b title="${esc(f.path||f.name)}">${esc(ci?f.name:f.name+' · racine')}</b><span>${f.total||''}</span></div><div class="colb">${h}</div></div>`;
   }).join('');
   requestAnimationFrame(()=>{box.querySelectorAll('.frow.open,.frow.target').forEach(r=>r.scrollIntoView({block:'nearest',inline:'nearest'}));fitCols(box)});
 }
 /* Comme le Finder : un nombre entier de colonnes remplit le panneau et la plus profonde reste visible */
+/* ---------- Largeur des colonnes réglée à la main (mémorisée par page) ---------- */
+const COLMIN=150,COLMAX=640;
+const colCfg=()=>{const all=ls.get('cs.colw',{});return all[S.page]||null};
+function saveColCfg(c){const all=ls.get('cs.colw',{});if(c)all[S.page]=c;else delete all[S.page];ls.set('cs.colw',all)}
+function colW(i){const c=colCfg();return c?Math.round((c.d&&c.d[i])||c.all||236):0}
+function updColAuto(){const b=$('#colAuto');if(b)b.classList.toggle('show',!!colCfg()&&$('#tree').classList.contains('cols'))}
+function colFit(col){
+  /* largeur nécessaire pour le nom le plus long de la colonne */
+  const cv=colFit.cv||(colFit.cv=document.createElement('canvas')),cx=cv.getContext('2d');let m=0;
+  col.querySelectorAll('.fname,.nm').forEach(el=>{cx.font=getComputedStyle(el).font;const extra=el.classList.contains('nm')?84:118;m=Math.max(m,cx.measureText(el.textContent).width+extra)});
+  return Math.max(COLMIN,Math.min(COLMAX,Math.ceil(m||236)));
+}
 function fitCols(box){
+  updColAuto();
   const n=box.querySelectorAll('.col').length,cw=box.clientWidth;if(!n||!cw)return;
+  if(colCfg()){box.style.scrollBehavior='auto';box.scrollLeft=box.scrollWidth;box.style.scrollBehavior='';return}
   const k=Math.max(1,Math.floor(cw/(S.page==='lib'?240:215))),w=cw/k;
   box.style.setProperty('--colw',w+'px');
   box.style.scrollBehavior='auto';box.scrollLeft=Math.max(0,(n-k)*w);box.style.scrollBehavior='';
@@ -1335,7 +1356,7 @@ function renderCrumbs(){
 }
 function renderFolders(){
   const box=$('#tree');
-  box.classList.toggle('cols',!!(S.root&&S.libView==='cols'&&!S.fq.trim()));
+  box.classList.toggle('cols',!!(S.root&&S.libView==='cols'&&!S.fq.trim()));updColAuto();
   $('#viewBtn').textContent=S.libView==='cols'?'☰ Arborescence':'▥ Colonnes';
   renderCrumbs();
   const nl=$('#navLib');nl.style.display=S.root&&S.root.total?'':'none';if(S.root)nl.textContent=S.root.total||'';
@@ -2262,6 +2283,39 @@ $('#list').addEventListener('dragstart',e=>{
 $('#list').addEventListener('dragend',()=>document.querySelectorAll('.dragging').forEach(r=>r.classList.remove('dragging')));
 
 const tree=$('#tree');
+(()=>{
+  let drag=null;
+  tree.addEventListener('pointerdown',e=>{
+    const h=e.target.closest('.colrs');if(!h)return;
+    e.preventDefault();e.stopPropagation();
+    const col=h.parentNode,cols=[...tree.querySelectorAll('.col')];
+    drag={h,col,i:+col.dataset.i,x:e.clientX,w:col.getBoundingClientRect().width,all:e.altKey,cols,base:cols.map(c=>c.getBoundingClientRect().width)};
+    h.setPointerCapture(e.pointerId);h.classList.add('on');tree.classList.add('resizing');
+  });
+  tree.addEventListener('pointermove',e=>{
+    if(!drag)return;
+    const nw=Math.max(COLMIN,Math.min(COLMAX,drag.w+e.clientX-drag.x));
+    if(drag.all)drag.cols.forEach(c=>c.style.width=nw+'px');else drag.col.style.width=nw+'px';
+    drag.nw=nw;
+  });
+  const end=()=>{
+    if(!drag)return;const d=drag;drag=null;d.h.classList.remove('on');tree.classList.remove('resizing');
+    if(d.nw==null)return;
+    let c=colCfg();
+    if(!c){c={all:Math.round(d.base[0]),d:{}};d.cols.forEach((col,k)=>c.d[k]=Math.round(d.base[k]))}
+    if(d.all){c.all=Math.round(d.nw);c.d={}}else{c.d=c.d||{};c.d[d.i]=Math.round(d.nw)}
+    saveColCfg(c);updColAuto();
+  };
+  tree.addEventListener('pointerup',end);tree.addEventListener('pointercancel',end);
+  tree.addEventListener('dblclick',e=>{
+    const h=e.target.closest('.colrs');if(!h)return;e.preventDefault();e.stopPropagation();
+    const col=h.parentNode,w=colFit(col);col.style.width=w+'px';
+    let c=colCfg();
+    if(!c){c={all:Math.round(tree.querySelector('.col').getBoundingClientRect().width),d:{}};tree.querySelectorAll('.col').forEach((x,k)=>c.d[k]=Math.round(x.getBoundingClientRect().width))}
+    c.d=c.d||{};c.d[+col.dataset.i]=w;saveColCfg(c);updColAuto();
+  });
+  $('#colAuto').onclick=()=>{saveColCfg(null);renderFolders()};
+})();
 tree.addEventListener('click',e=>{
   const lf=e.target.closest('.lf');
   if(lf){const f=S.map.get(lf.dataset.p);if(f)playLib(f,lf.dataset.n);return}
