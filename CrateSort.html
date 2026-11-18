@@ -250,6 +250,9 @@ button.on{border-color:var(--a);color:var(--a-text);background:var(--a-soft)}
 .updc span{display:block}
 .updc button{margin-top:10px;padding:7px 12px;font-size:12.5px;width:100%}
 .updc button:empty{display:none}
+.updc a{display:block;margin-top:8px;font-size:12px;color:var(--a-text)}
+.updc.err{border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:color-mix(in srgb,var(--warn) 8%,transparent)}
+.updc.err svg{color:var(--warn)}
 .sfoot .ver{display:block;font-style:normal;margin-top:6px;color:var(--faint);font-size:11.5px}
 .updrow{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
 #tour{position:fixed;inset:0;z-index:90;display:none;pointer-events:none}
@@ -353,7 +356,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
     <button class="nav" id="tourBtn" title="Visite guidée de CrateSort"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></svg><span>Visite guidée</span></button>
     <button class="nav" id="helpBtn" title="Raccourcis clavier (?)"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span>Raccourcis</span></button>
   </nav>
-  <div class="updc" id="updCard" style="display:none"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><div><b id="updT"></b><span id="updS"></span><button class="primary" id="updGo"></button></div></div>
+  <div class="updc" id="updCard" style="display:none"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><div><b id="updT"></b><span id="updS"></span><button class="primary" id="updGo"></button><a href="#" id="updMan" style="display:none">Télécharger à la main</a></div></div>
   <div class="sfoot" title="Tout fonctionne en local : aucun fichier ne quitte l'ordinateur"><svg class="i" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><b>100 % local</b>Rien n'est effacé : les rejets vont dans _Rejetes.<em class="ver" id="appVer"></em></div></div>
 </aside>
 
@@ -789,13 +792,19 @@ const UP={st:{state:'idle'},platform:''};
 function renderUpd(){
   const s=UP.st,mac=UP.platform==='darwin',card=$('#updCard');
   let t='',sub='',btn='';
+  let man=false,err=false;
   if(s.state==='downloading'){t=`Mise à jour ${s.version||''}`;sub=`Téléchargement… ${s.percent||0} %`}
+  else if(s.state==='installing'){t=`Mise à jour ${s.version||''}`;sub='Vérification et installation de la nouvelle version…'}
+  else if(s.state==='restarting'){t='Redémarrage…';sub='CrateSort se ferme et se rouvre sur la nouvelle version.'}
   else if(s.state==='ready'){t=`Mise à jour ${s.version} prête`;sub='Elle s’installera au prochain redémarrage.';btn='Redémarrer maintenant'}
-  else if(s.state==='available'){t=`Nouvelle version ${s.version}`;sub=mac?'Téléchargez-la, puis glissez CrateSort dans Applications.':'Une nouvelle version est disponible.';btn='Télécharger'}
-  card.style.display=t?'':'none';card.title=t+(sub?' · '+sub:'');
+  else if(s.state==='available'){t=`Nouvelle version ${s.version}`;
+    if(s.mac){sub='Téléchargement, installation et redémarrage automatiques.';btn='Mettre à jour';man=true}
+    else{sub=mac?'Téléchargez-la, puis glissez CrateSort dans Applications.':'Une nouvelle version est disponible.';btn='Télécharger'}}
+  else if(s.state==='error'&&s.code&&s.code!=='dev'){t='Mise à jour interrompue';sub=s.error||'';btn=s.code==='install'?'Réessayer':'';man=true;err=true}
+  card.style.display=t?'':'none';card.title=t+(sub?' · '+sub:'');card.classList.toggle('err',err);$('#updMan').style.display=man?'':'none';
   $('#updT').textContent=t;$('#updS').textContent=sub;$('#updGo').textContent=btn;
   const info={idle:'',checking:'Recherche en cours…',none:'Vous avez la dernière version.',dev:'Mode développement : pas de mise à jour.',
-    error:'Impossible de vérifier pour le moment (connexion ?).',downloading:sub,ready:t+'. '+sub,available:t+'.'}[s.state]||'';
+    error:s.code&&s.code!=='dev'?sub:'Impossible de vérifier pour le moment (connexion ?).',downloading:sub,installing:sub,restarting:sub,ready:t+'. '+sub,available:t+'.'}[s.state]||'';
   $('#updInfo').textContent=info;
 }
 async function initUpdates(){
@@ -805,7 +814,7 @@ async function initUpdates(){
   try{const i=await NV.appInfo();UP.platform=i.platform;$('#appVer').textContent='Version '+i.version}catch{}
   NV.onUpd(st=>{const prev=UP.st.state;UP.st=st;renderUpd();
     if(st.state==='ready'&&prev!=='ready')toast(`Mise à jour ${st.version} prête : elle s’installera au prochain redémarrage`,'','Redémarrer',()=>NV.updInstall(),12000);
-    else if(st.state==='available'&&prev!=='available')toast(`Nouvelle version ${st.version} disponible`,'','Télécharger',()=>NV.updInstall(),12000);});
+    else if(st.state==='available'&&prev!=='available')toast(`Nouvelle version ${st.version} disponible`,'',st.mac?'Mettre à jour':'Télécharger',()=>NV.updInstall(),12000);});
   try{UP.st=await NV.updState();renderUpd()}catch{}
   if($('#updAuto').checked)setTimeout(()=>NV.updCheck(false),4000);
 }
@@ -2361,6 +2370,7 @@ $('#accs').addEventListener('change',e=>{if(e.target.id==='accPick')renderTheme(
 $('#bgs').addEventListener('click',e=>{const b=e.target.closest('.bgc');if(b)applyTheme({a:TH.a,bg:b.dataset.bg},true)});
 $('#thOk').onclick=()=>closeModal($('#theme'));
 $('#updGo').onclick=()=>NV&&NV.updInstall();
+$('#updMan').onclick=e=>{e.preventDefault();NV&&NV.updManual&&NV.updManual()};
 $('#updCard').addEventListener('click',e=>{if(!e.target.closest('button')&&innerWidth<=1280)openTheme()});
 $('#updNow').onclick=()=>{if(NV&&NV.updCheck){UP.st={state:'checking'};renderUpd();NV.updCheck(true)}};
 $('#updAuto').onchange=e=>ls.set('cs.updAuto',e.target.checked);
