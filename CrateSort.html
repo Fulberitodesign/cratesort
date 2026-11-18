@@ -49,6 +49,9 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .logo svg{width:26px;height:26px}.logo .crate{fill:var(--a)}
 .brand b{font-size:19px;letter-spacing:-.2px;display:block;line-height:1.15}
 .brand span{color:var(--muted);font-size:13px}
+.bver{font-style:normal;margin-left:6px;font-size:11.5px;font-weight:600;color:var(--a-text);background:var(--a-soft);border:1px solid var(--a-line);border-radius:99px;padding:0 7px}
+.bver:empty{display:none}
+.vline{margin-top:10px;font-size:13px;color:var(--text2)}.vline b{color:var(--text)}
 #side nav{display:flex;flex-direction:column;gap:4px}
 .nav{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:transparent;border:0;border-radius:12px;padding:12px 14px;color:var(--text2);font-size:15px}
 .nav:hover{background:var(--hover);color:var(--text)}
@@ -253,7 +256,7 @@ button.on{border-color:var(--a);color:var(--a-text);background:var(--a-soft)}
 .updc a{display:block;margin-top:8px;font-size:12px;color:var(--a-text)}
 .updc.err{border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:color-mix(in srgb,var(--warn) 8%,transparent)}
 .updc.err svg{color:var(--warn)}
-.sfoot .ver{display:block;font-style:normal;margin-top:6px;color:var(--faint);font-size:11.5px}
+.sfoot .ver{display:block;font-style:normal;margin-top:6px;color:var(--muted);font-size:11.5px}
 .updrow{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
 #tour{position:fixed;inset:0;z-index:90;display:none;pointer-events:none}
 #tour.on{display:block}
@@ -354,7 +357,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
 
 <div id="app">
 <aside id="side">
-  <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.8"/><circle cx="12" cy="9.5" r="2.4"/><path class="crate" d="M3 13h18v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9.5 17h5"/></svg></div><div><b>CrateSort</b><span>pour DJ</span></div></div>
+  <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.8"/><circle cx="12" cy="9.5" r="2.4"/><path class="crate" d="M3 13h18v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9.5 17h5"/></svg></div><div><b>CrateSort</b><span>pour DJ<em class="bver" id="brandVer"></em></span></div></div>
   <nav>
     <button class="nav on" data-page="sort" title="Ranger les nouveaux morceaux"><svg class="i" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span>Ranger</span><em class="cnt" id="navTodo">0</em></button>
     <button class="nav" data-page="lib" title="Parcourir la bibliothèque en colonnes"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg><span>Bibliothèque</span><em class="cnt" id="navLib" style="display:none"></em></button>
@@ -536,6 +539,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
     <div class="bgs" id="bgs"></div>
     <div id="updSet" style="display:none">
       <h4>Mises à jour</h4>
+      <div class="vline" id="setVer"></div>
       <label class="sw"><input type="checkbox" id="updAuto" checked> Rechercher les mises à jour à chaque ouverture</label>
       <div class="updrow"><button id="updNow">Rechercher maintenant</button><span class="mut" id="updInfo"></span></div>
     </div>
@@ -878,7 +882,7 @@ async function initUpdates(){
   if(!NV||!NV.updCheck)return;
   $('#updSet').style.display='';
   $('#updAuto').checked=ls.get('cs.updAuto',true)!==false;
-  try{const i=await NV.appInfo();UP.platform=i.platform;$('#appVer').textContent='Version '+i.version}catch{}
+  try{const i=await NV.appInfo();UP.platform=i.platform;$('#appVer').textContent='Version '+i.version;$('#brandVer').textContent='v'+i.version;$('#setVer').innerHTML='Version installée : <b>'+esc(i.version)+'</b>'}catch{}
   NV.onUpd(st=>{const prev=UP.st.state;UP.st=st;renderUpd();
     if(st.state==='ready'&&prev!=='ready')toast(`Mise à jour ${st.version} prête : elle s’installera au prochain redémarrage`,'','Redémarrer',()=>NV.updInstall(),12000);
     else if(st.state==='available'&&prev!=='available')toast(`Nouvelle version ${st.version} disponible`,'',st.mac?'Mettre à jour':'Télécharger',()=>NV.updInstall(),12000);});
