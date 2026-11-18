@@ -118,7 +118,7 @@ def build():
       <span class="pill" style="background:var(--a-soft);color:var(--a);border-color:var(--a-line)">Nouveau</span>
       <h2 id="t-serato" style="font-size:clamp(28px,3.4vw,42px);font-weight:800;margin-bottom:14px">Votre bibliothèque Serato à jour en un clic</h2>
       <p style="color:var(--text2);font-size:18px">Vous avez rangé 20 morceaux sur 100 et la soirée commence dans un quart d’heure ? Un clic sur « Mettre à jour Serato » envoie ce qui est rangé, et vous continuerez plus tard.</p>
-      <ul class="list"><li>Crates qui suivent vos dossiers</li><li>Chemins réparés pour les morceaux déjà dans Serato</li><li>Sauvegarde automatique et annulation en un clic</li><li>Plus besoin de réimporter vos morceaux</li></ul>
+      <ul class="list"><li>Crates qui suivent vos dossiers</li><li>Morceaux introuvables retrouvés et réparés, même sur un disque externe</li><li>Sauvegarde automatique et annulation en un clic</li><li>Plus besoin de réimporter vos morceaux</li></ul>
     </div>
     <div class="shot rv"><img src="assets/img/bibliotheque-800.webp" srcset="assets/img/bibliotheque-800.webp 800w, assets/img/bibliotheque.webp 1600w" sizes="(max-width: 860px) 100vw, 560px" width="1600" height="1000" alt="La bibliothèque de CrateSort en colonnes" loading="lazy"></div>
   </div>
