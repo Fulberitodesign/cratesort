@@ -11,6 +11,8 @@ Outil de rangement de morceaux pour DJ : écoutez vos nouveaux téléchargements
 
 Toutes les versions sont sur la page [Releases](https://github.com/Fulberitodesign/cratesort/releases).
 
+Site et blog : [fulberitodesign.github.io/cratesort](https://fulberitodesign.github.io/cratesort/) (sources dans `site/`, générateur dans `outils/site/`).
+
 **Mac** : ouvrez le `.dmg` et glissez CrateSort dans Applications. Au premier lancement, macOS indique qu'il ne peut pas vérifier l'application : cliquez sur « Terminé », puis allez dans Réglages Système → Confidentialité et sécurité → « Ouvrir quand même ». À faire une seule fois.
 
 **Windows** : double-cliquez sur le `.exe`. Si Windows affiche « Windows a protégé votre ordinateur », cliquez sur « Informations complémentaires » → « Exécuter quand même ». CrateSort s'installe, crée un raccourci sur le bureau et s'ouvre.

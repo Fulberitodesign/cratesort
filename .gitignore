@@ -4,3 +4,4 @@ desktop/CrateSort.html
 *.zip
 .DS_Store
 Thumbs.db
+__pycache__/
