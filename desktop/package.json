@@ -1,7 +1,7 @@
 {
   "name": "cratesort",
   "productName": "CrateSort",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Rangement de morceaux pour DJ",
   "main": "main.js",
   "private": true,
@@ -31,6 +31,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "serato.js",
       "CrateSort.html",
       "package.json"
     ],

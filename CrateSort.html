@@ -265,6 +265,22 @@ button.on{border-color:var(--a);color:var(--a-text);background:var(--a-soft)}
 .tact2 button{padding:7px 13px;font-size:13px}
 .tact2 .skip{background:transparent;border:0;color:var(--muted);padding:7px 4px}
 .tact2 .skip:hover{color:var(--text)}
+.nav.ser{border:1px solid var(--a-line);background:var(--a-soft);color:var(--text);margin-top:6px}
+.nav.ser svg{color:var(--a-text)}
+.nav.ser:hover{background:var(--a-mid)}
+.nav.ser .cnt{background:var(--a);color:var(--a-ink);border-color:transparent;font-weight:700}
+.nav.ser.zero .cnt{background:transparent;color:var(--muted);border-color:var(--line2);font-weight:500}
+button.kpi.ser{border-color:var(--a-line);cursor:pointer}button.kpi.ser b{color:var(--a-text)}button.kpi.ser:hover{background:var(--a-soft);border-color:var(--a)}
+.serst{margin:16px 0 4px;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--input);font-size:13.5px;display:flex;gap:10px;align-items:center}
+.serst.ok{border-color:var(--a-line)}.serst.bad{border-color:color-mix(in srgb,var(--warn) 45%,transparent);color:var(--warn)}
+.modal label.serr{margin:8px 0;white-space:normal;display:flex;align-items:center;flex-wrap:wrap;gap:6px;color:var(--text2);font-size:13.5px}
+.modal label.serr small{flex-basis:100%;padding-left:24px}
+.modal label.serr input[type=text]{width:220px}
+.serres{margin-top:18px;padding:16px;border-radius:14px;background:var(--a-soft);border:1px solid var(--a-line);font-size:13.5px;color:var(--text2)}
+.serres b{color:var(--text);font-size:15px;display:block;margin-bottom:6px}
+.serres ul{margin:8px 0;padding-left:18px}
+.serres .row{margin-top:12px}
+.serres.err{background:color-mix(in srgb,var(--err) 10%,transparent);border-color:color-mix(in srgb,var(--err) 40%,transparent)}
 #unsup{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;place-items:center;text-align:center;padding:30px}
 
 #split{width:14px;cursor:col-resize;position:relative;flex:none}
@@ -313,7 +329,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
   .kpi{min-width:110px}
 }
 @media(max-width:1100px){#wave{order:10;flex-basis:100%}}
-@media(max-width:1280px){.bpal .clabel,.bdest .mut{display:none}}
+@media(max-width:1280px){.bpal .clabel,.bdest .mut{display:none}button.kpi.ser span{font-size:11.5px}}
 @media(max-width:1520px){.popts .lbl{display:none}}
 @media(max-height:820px){#top{padding:14px 24px 0}.ttl h1{font-size:20px}.ttl p{display:none}.kpi{padding:5px 14px;flex-direction:row;align-items:baseline;gap:8px}.kpi b{font-size:19px}main{padding-top:10px}}
 @media(max-width:900px){
@@ -331,6 +347,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
   <nav>
     <button class="nav on" data-page="sort" title="Ranger les nouveaux morceaux"><svg class="i" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span>Ranger</span><em class="cnt" id="navTodo">0</em></button>
     <button class="nav" data-page="lib" title="Parcourir la bibliothèque en colonnes"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg><span>Bibliothèque</span><em class="cnt" id="navLib" style="display:none"></em></button>
+    <button class="nav ser" id="serBtn" style="display:none" title="Envoyer les morceaux rangés dans Serato"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/></svg><span>Mettre à jour Serato</span><em class="cnt" id="serCnt">0</em></button>
     <button class="nav" id="expBtn" title="Exporter la playlist (.m3u8, .csv)"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Exporter la playlist</span></button>
     <button class="nav" id="themeBtn" title="Apparence et mises à jour"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Réglages</span></button>
     <button class="nav" id="tourBtn" title="Visite guidée de CrateSort"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></svg><span>Visite guidée</span></button>
@@ -348,6 +365,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
     <div class="kpi lime"><b id="st1">0</b><span>à ranger</span></div>
     <div class="kpi"><b id="st2">0</b><span>rangés cette session</span></div>
     <button class="kpi amber" id="kDup" title="Afficher les doublons"><b id="st4">0</b><span>doublons</span></button>
+    <button class="kpi ser" id="kSer" style="display:none" title="Mettre à jour votre bibliothèque Serato"><b id="st5">0</b><span>à envoyer dans Serato</span></button>
   </div>
 </div>
 
@@ -475,6 +493,21 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
   </div>
 </div>
 <div id="tour"><div class="thole"></div><div class="ttip" role="dialog" aria-live="polite"><div class="tstep"></div><h4></h4><p></p><div class="tact2"></div></div></div>
+
+<div class="modal" id="serato">
+  <div class="card">
+    <h3>Mettre à jour Serato</h3>
+    <p class="mut" id="serIntro" style="margin:0"></p>
+    <div class="serst" id="serState"></div>
+    <h4>Crates</h4>
+    <label class="sw serr"><input type="radio" name="serMode" value="folders" checked> Des crates qui suivent mes dossiers <small class="mut">(House › Deep House → crate House, sous-crate Deep House)</small></label>
+    <label class="sw serr"><input type="radio" name="serMode" value="single"> Une seule crate : <input type="text" id="serName" value="Nouveaux morceaux" maxlength="60" style="width:200px"></label>
+    <label class="sw serr" style="margin-top:12px"><input type="checkbox" id="serAll"> Renvoyer tous les morceaux rangés avec CrateSort, pas seulement les nouveaux</label>
+    <p class="mut" id="serWhere" style="margin:14px 0 0;font-size:12.5px"></p>
+    <div class="row"><button class="primary" id="serGo">Mettre à jour Serato</button><button class="ghost" id="serClose">Fermer</button></div>
+    <div class="serres" id="serRes" style="display:none"></div>
+  </div>
+</div>
 
 <div class="modal" id="theme">
   <div class="card">
@@ -610,6 +643,78 @@ function renderTheme(){
 }
 function openTheme(){renderTheme();renderUpd();$('#theme').style.display='grid'}
 
+/* ---------- Mise à jour de la bibliothèque Serato (application de bureau) ---------- */
+const SER={busy:false,last:null};
+const serKey=()=>'cs.serato.'+(S.lib&&S.lib.path||'');
+const serOn=()=>!!(NV&&NV.seratoSync&&S.lib&&S.lib.path);
+function serPending(all){if(!serOn())return[];const last=all?0:ls.get(serKey(),0);return S.log.filter(e=>e.id>last)}
+function serItems(list){
+  const root=S.lib.path,sep=root.includes('\\')&&!root.includes('/')?'\\':'/';
+  return list.map(e=>({dst:root+sep+(e.p?e.p.split('/').join(sep)+sep:'')+e.n,src:e.s||'',folder:e.p||'',t:e.t,
+    meta:{title:e.ti||'',artist:e.a||'',genre:e.g||'',bpm:e.b||'',key:e.k||''}}));
+}
+function updSerCounts(){
+  const on=serOn();$('#serBtn').style.display=on?'':'none';$('#kSer').style.display=on?'':'none';
+  if(!on)return;const n=serPending().length;
+  $('#serCnt').textContent=n;$('#st5').textContent=n;$('#serBtn').classList.toggle('zero',!n);
+  $('#serBtn').title=n?`${n} morceau${n>1?'x':''} à envoyer dans Serato`:'Serato est à jour';
+}
+function serRender(){
+  const all=$('#serAll').checked,n=serPending(all).length,last=ls.get(serKey()+'.date',0);
+  $('#serIntro').textContent=n?`${n} morceau${n>1?'x':''} ${all?'rangé'+(n>1?'s':'')+' avec CrateSort':'rangé'+(n>1?'s':'')+' depuis la dernière mise à jour'} ${n>1?'seront envoyés':'sera envoyé'} dans Serato.`
+    :'Aucun nouveau morceau rangé depuis la dernière mise à jour. Serato est à jour.'+(last?` (Dernière mise à jour : ${fdate(last)}.)`:'');
+  $('#serGo').disabled=!n||SER.busy;
+}
+async function openSerato(){
+  if(!serOn())return;
+  $('#serRes').style.display='none';$('#serato').style.display='grid';
+  const md=ls.get('cs.serato.mode','folders');document.querySelector(`input[name=serMode][value=${md}]`).checked=true;
+  $('#serName').value=ls.get('cs.serato.name','Nouveaux morceaux');
+  serRender();
+  const st=$('#serState');st.className='serst';st.textContent='Vérification de Serato…';
+  try{
+    const r=await nv('seratoStatus',S.lib.path);
+    st.className='serst '+(r.running?'bad':'ok');
+    st.textContent=r.running?'⚠ Serato est ouvert. Fermez-le avant de mettre à jour, sinon il écraserait les changements en quittant.':'✓ Serato est fermé : la mise à jour peut se faire.';
+    $('#serWhere').textContent=`Dossier Serato : ${r.serato}${r.exists?'':' (il sera créé)'} · une sauvegarde est faite avant chaque mise à jour.`;
+  }catch(e){st.className='serst bad';st.textContent='Impossible de vérifier Serato : '+e.message}
+}
+async function runSerato(){
+  const all=$('#serAll').checked,list=serPending(all);if(!list.length||SER.busy)return;
+  const mode=document.querySelector('input[name=serMode]:checked').value,single=$('#serName').value.trim()||'Nouveaux morceaux';
+  ls.set('cs.serato.mode',mode);ls.set('cs.serato.name',single);
+  SER.busy=true;serRender();$('#serGo').textContent='Mise à jour en cours…';
+  const res=$('#serRes');res.className='serres';res.style.display='none';
+  try{
+    const r=await nv('seratoSync',{items:serItems(list),mode,single});
+    const maxId=list.reduce((m,e)=>Math.max(m,e.id),0);
+    ls.set(serKey(),Math.max(ls.get(serKey(),0),maxId));ls.set(serKey()+'.date',Date.now());
+    SER.last=r.backups;ls.set('cs.serato.lastBackups',r.backups);
+    const pl=(n,a,b)=>`${n} ${n>1?b:a}`;
+    res.innerHTML=`<b>Serato est à jour</b>${pl(r.added,'morceau ajouté','morceaux ajoutés')}${r.repaired?', '+pl(r.repaired,'chemin réparé','chemins réparés'):''}${r.already?', '+pl(r.already,'déjà présent','déjà présents'):''}.`
+      +(r.crates.length?`<ul>${r.crates.slice(0,8).map(c=>`<li>Crate ${esc(c)}</li>`).join('')}${r.crates.length>8?`<li>… et ${r.crates.length-8} autres</li>`:''}</ul>`:'')
+      +(r.missing?`<div class="mut">${pl(r.missing,'morceau introuvable ignoré (déplacé ou supprimé depuis)','morceaux introuvables ignorés (déplacés ou supprimés depuis)')}.</div>`:'')
+      +`<div class="mut" style="margin-top:6px">Sauvegarde : ${esc(r.backups.join(', '))}</div><div class="row"><button id="serUndo">Annuler les changements</button></div>`;
+    res.style.display='';
+    toast(`Serato est à jour : ${pl(r.added+r.repaired,'morceau envoyé','morceaux envoyés')}`,'',null,null,4500);
+  }catch(e){
+    res.className='serres err';res.style.display='';
+    res.innerHTML=`<b>La mise à jour n\u2019a pas pu se faire</b>${esc(e.message)}`;
+    if(/ouvert/i.test(e.message)){const st=$('#serState');st.className='serst bad';st.textContent='⚠ Serato est ouvert. Fermez-le, puis cliquez à nouveau sur « Mettre à jour Serato ».'}
+  }
+  SER.busy=false;$('#serGo').textContent='Mettre à jour Serato';$('#serAll').checked=false;serRender();updSerCounts();
+}
+async function undoSerato(){
+  const b=SER.last||ls.get('cs.serato.lastBackups',null);if(!b)return;
+  try{await nv('seratoUndo',b);ls.set(serKey(),0);ls.set('cs.serato.lastBackups',null);SER.last=null;
+    $('#serRes').innerHTML='<b>Changements annulés</b>Votre bibliothèque Serato est revenue à son état d\u2019avant la mise à jour.';serRender();updSerCounts();
+    toast('Mise à jour Serato annulée','',null,null,3500)}
+  catch(e){toast('Annulation impossible : '+e.message,'err')}
+}
+$('#serBtn').onclick=openSerato;$('#kSer').onclick=openSerato;$('#serGo').onclick=runSerato;$('#serClose').onclick=()=>closeModal($('#serato'));
+$('#serAll').onchange=serRender;
+$('#serRes').addEventListener('click',e=>{if(e.target.id==='serUndo')undoSerato()});
+
 /* ---------- Visite guidée ---------- */
 const K=(...k)=>k.map(x=>`<kbd>${x}</kbd>`).join('+');
 const TOUR=[
@@ -619,6 +724,7 @@ const TOUR=[
   {sel:'#wave',t:'La forme d’onde',d:`Cliquez ou glissez dessus pour parcourir le morceau. ${K('←')} ${K('→')} : 10 secondes en arrière ou en avant.`},
   {sel:'#tree',t:'Choisir la destination',d:'Ouvrez vos dossiers en colonnes : le fil d’Ariane montre où vous êtes. Survolez un dossier et cliquez ★ pour en faire un favori. Glissez le bord d’une colonne pour régler sa largeur.'},
   {sel:'#bar',t:'Ranger en une touche',d:`« Déplacer » ou ${K('Entrée')} range la sélection dans le dossier choisi. ${K('Maj','1')}…${K('9')} envoie directement vers vos favoris. ${K('Suppr')} écarte dans _Rejetes (rien n’est effacé) et ${K('Ctrl','Z')} annule.`},
+  {sel:'#serBtn',t:'Mettre à jour Serato',d:'Un clic, à tout moment, envoie dans Serato les morceaux que vous venez de ranger, même si vous n\u2019avez pas fini. Fermez Serato avant ; une sauvegarde est faite à chaque fois.'},
   {sel:'#pal',t:'Couleurs et lots',d:`Touches ${K('1')} à ${K('8')} : étiquetez vos morceaux par couleur pour former des lots, puis liez une couleur à un dossier pour tout ranger en un clic.`},
   {sel:'#harmBtn',t:'Morceaux compatibles',d:`${K('H')} n’affiche que les morceaux qui se mixent bien avec celui sélectionné : tonalité voisine et BPM à ±6 %.`},
   {sel:'#themeBtn',t:'Réglages',d:'Couleur principale, fond (Sombre, Noir, Nuit, Clair) et mises à jour.'},
@@ -1498,6 +1604,7 @@ function updateBar(){
   $('#st2').textContent=S.moved;
   $('#st4').textContent=S.tracks.reduce((s,t)=>s+(t.dup?1:0),0);
   $('#kDup').classList.toggle('on',S.tagFilter==='dup');
+  updSerCounts();
   const first=S.selected.values().next().value;
   const sig=first?tkey(first)+'|'+(first.meta?'m':'')+'|'+n:'';
   if(sig!==S.sg){S.sg=sig;renderChips()}
@@ -1726,7 +1833,8 @@ async function moveBatch(groups,opts={}){
     S.undo.push({items:done});
     for(const d of real){
       const m=d.t.meta||{};
-      S.log.push({id:d.logId,t:Date.now(),n:d.name,p:d.dest.path,a:m.artist||'',ti:m.title||'',d:m.dur||0,b:m.bpm||'',k:m.key||'',g:m.genre||''});
+      const sp=d.srcDir&&d.srcDir.path?d.srcDir.path+(d.srcDir.path.includes('\\')?'\\':'/')+d.t.name:'';
+      S.log.push({id:d.logId,t:Date.now(),n:d.name,p:d.dest.path,s:sp,a:m.artist||'',ti:m.title||'',d:m.dur||0,b:m.bpm||'',k:m.key||'',g:m.genre||''});
       idxAdd(d.name,d.dest);bumpCount(d.dest,1);
       if(m.artist)S.artists[m.artist.toLowerCase()]=d.dest.path;
       S.recent=[d.dest.path,...S.recent.filter(p=>p!==d.dest.path)].slice(0,8);

@@ -1,5 +1,6 @@
 const {app,BrowserWindow,Menu,session,shell,dialog,ipcMain,net}=require('electron');
 const path=require('path'),fs=require('fs'),fsp=fs.promises,{pathToFileURL}=require('url');
+const serato=require('./serato');
 
 /* ---------- Accès disque natif ----------
    Le moteur web masque certains noms (? " * | < > : …). L'application lit donc le disque directement,
@@ -113,6 +114,18 @@ async function checkUpdates(manual){
   }catch(e){setUpd({state:'error',error:String(e&&e.message||e).slice(0,200)})}
   return{...UPD};
 }
+/* Serato : uniquement pour des morceaux situés dans les dossiers choisis par l'utilisateur */
+Object.assign(H,{
+  async seratoStatus(lib){return serato.status(dirOk(lib))},
+  async seratoSync(o){
+    const items=(o&&o.items||[]).filter(it=>typeof it.dst==='string'&&inside(it.dst));
+    return serato.sync({items,mode:o.mode==='single'?'single':'folders',single:String(o.single||'').slice(0,80)});
+  },
+  async seratoUndo(list){
+    const ok=(list||[]).filter(b=>typeof b==='string'&&path.basename(path.dirname(path.resolve(b)))==='_Serato_Backup_CrateSort');
+    return serato.undo(ok);
+  }
+});
 Object.assign(H,{
   async appInfo(){return{version:app.getVersion(),platform:process.platform,packaged:app.isPackaged}},
   async updCheck(manual){return checkUpdates(manual)},

@@ -130,7 +130,7 @@ body='''
 <li><strong>Rangez vos fichiers avant de les importer</strong> dans Serato : c’est le principe de la routine décrite dans <a href="ranger-telechargements-musique.html">ranger ses téléchargements</a>.</li>
 <li>Si vous devez déplacer des morceaux déjà importés, utilisez un outil qui met à jour les chemins dans Serato, ou relocalisez les fichiers manquants depuis Serato.</li>
 </ol>
-<div class="tip"><p>Bientôt dans CrateSort : un bouton « Mettre à jour Serato » qui ajoute les morceaux rangés à votre bibliothèque Serato et crée les crates correspondant à vos dossiers, avec une sauvegarde automatique avant chaque modification.</p></div>
+<div class="tip"><p>Dans CrateSort (application de bureau), le bouton « Mettre à jour Serato » ajoute les morceaux rangés à votre bibliothèque Serato, crée les crates correspondant à vos dossiers et répare le chemin des morceaux déjà connus de Serato, avec une sauvegarde automatique avant chaque modification.</p></div>
 
 <h2 id="sauvegarde">Sauvegardez le dossier _Serato_</h2>
 <p>Vos crates, analyses et points de repère vivent dans <code>_Serato_</code>. Copiez-le régulièrement, avec votre musique, sur un autre disque. C’est la meilleure assurance contre une mauvaise manipulation.</p>
