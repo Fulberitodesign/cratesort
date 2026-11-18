@@ -6,5 +6,6 @@ contextBridge.exposeInMainWorld('csNative',{
   touch:(d,n)=>call('touch',d,n),mkdir:(d,n)=>call('mkdir',d,n),dirpath:(d,n)=>call('dirpath',d,n),
   move:(sd,n,dd,nn)=>call('move',sd,n,dd,nn),remove:(d,n)=>call('remove',d,n),url:(d,n)=>call('url',d,n),
   appInfo:()=>call('appInfo'),updCheck:m=>call('updCheck',!!m),updState:()=>call('updState'),updInstall:()=>call('updInstall'),
-  onUpd:cb=>{ipcRenderer.on('upd:status',(e,st)=>cb(st))}
+  onUpd:cb=>{ipcRenderer.on('upd:status',(e,st)=>cb(st))},
+  seratoStatus:l=>call('seratoStatus',l),seratoSync:o=>call('seratoSync',o),seratoUndo:b=>call('seratoUndo',b)
 });
