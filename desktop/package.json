@@ -1,7 +1,7 @@
 {
   "name": "cratesort",
   "productName": "CrateSort",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Rangement de morceaux pour DJ",
   "main": "main.js",
   "private": true,
@@ -76,6 +76,17 @@
       "shortcutName": "CrateSort",
       "deleteAppDataOnUninstall": false,
       "differentialPackage": false
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Fulberitodesign",
+        "repo": "cratesort",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "6.8.11"
   }
 }

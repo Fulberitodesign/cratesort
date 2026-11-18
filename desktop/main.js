@@ -1,4 +1,4 @@
-const {app,BrowserWindow,Menu,session,shell,dialog,ipcMain}=require('electron');
+const {app,BrowserWindow,Menu,session,shell,dialog,ipcMain,net}=require('electron');
 const path=require('path'),fs=require('fs'),fsp=fs.promises,{pathToFileURL}=require('url');
 
 /* ---------- Accès disque natif ----------
@@ -77,6 +77,52 @@ const H={
   async remove(d,n){const p=child(d,n);const st=await fsp.lstat(p);if(st.isDirectory())await fsp.rmdir(p);else await fsp.unlink(p);return{ok:true}},
   async url(d,n){return pathToFileURL(child(d,n)).href}
 };
+/* ---------- Mises à jour ----------
+   Windows : téléchargement en arrière-plan puis installation au redémarrage (electron-updater).
+   Mac : l'app n'étant pas signée par Apple, elle ne peut pas se remplacer seule ;
+   on signale la nouvelle version et on propose de télécharger le .dmg. */
+const REPO='Fulberitodesign/cratesort';
+const UPD={state:'idle',version:null,percent:0,manual:false};
+const sendUpd=()=>{if(win&&!win.isDestroyed())win.webContents.send('upd:status',{...UPD})};
+const setUpd=o=>{Object.assign(UPD,o);sendUpd()};
+const newer=(a,b)=>{const x=String(a).replace(/^v/,'').split('.').map(Number),y=String(b).replace(/^v/,'').split('.').map(Number);
+  for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return (x[i]||0)>(y[i]||0)}return false};
+let updater=null;
+function winUpdater(){
+  if(updater)return updater;
+  const {autoUpdater}=require('electron-updater');
+  autoUpdater.autoDownload=true;autoUpdater.autoInstallOnAppQuit=true;
+  autoUpdater.on('update-available',i=>setUpd({state:'downloading',version:i.version,percent:0}));
+  autoUpdater.on('download-progress',p=>setUpd({state:'downloading',percent:Math.round(p.percent||0)}));
+  autoUpdater.on('update-downloaded',i=>setUpd({state:'ready',version:i.version,percent:100}));
+  autoUpdater.on('update-not-available',()=>setUpd({state:'none'}));
+  autoUpdater.on('error',e=>setUpd({state:'error',error:String(e&&e.message||e).slice(0,200)}));
+  return updater=autoUpdater;
+}
+async function checkUpdates(manual){
+  if(!app.isPackaged){setUpd({state:'dev',manual:!!manual});return{...UPD}}
+  if(['checking','downloading','ready'].includes(UPD.state))return{...UPD};
+  setUpd({state:'checking',manual:!!manual,error:null});
+  try{
+    if(process.platform==='win32'){await winUpdater().checkForUpdates();return{...UPD}}
+    const r=await net.fetch(`https://api.github.com/repos/${REPO}/releases/latest`,{headers:{Accept:'application/vnd.github+json','User-Agent':'CrateSort'}});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const rel=await r.json();
+    if(rel.tag_name&&newer(rel.tag_name,app.getVersion()))setUpd({state:'available',version:String(rel.tag_name).replace(/^v/,'')});
+    else setUpd({state:'none'});
+  }catch(e){setUpd({state:'error',error:String(e&&e.message||e).slice(0,200)})}
+  return{...UPD};
+}
+Object.assign(H,{
+  async appInfo(){return{version:app.getVersion(),platform:process.platform,packaged:app.isPackaged}},
+  async updCheck(manual){return checkUpdates(manual)},
+  async updState(){return{...UPD}},
+  async updInstall(){
+    if(UPD.state==='ready'&&updater){setImmediate(()=>updater.quitAndInstall(true,true));return{ok:true}}
+    if(UPD.state==='available'){await shell.openExternal(`https://github.com/${REPO}/releases/latest/download/CrateSort-Mac.dmg`);return{ok:true}}
+    return{ok:false};
+  }
+});
 for(const [k,fn] of Object.entries(H))ipcMain.handle('fs:'+k,async(e,...a)=>{
   if(!e.senderFrame||!e.senderFrame.url.startsWith('file:'))return{err:{code:'EACCES',msg:'origine refusée'}};
   try{return await fn(...a)}catch(x){return{err:{code:x.code||'EUNKNOWN',msg:String(x.message||x)}}}
