@@ -244,6 +244,14 @@ button.on{border-color:var(--a);color:var(--a-text);background:var(--a-soft)}
 .pv i{display:block}
 .pv .ps{width:24%;}.pv .pm{flex:1;padding:9px;display:flex;flex-direction:column;gap:6px}
 .pv .pc{flex:1;border-radius:5px}.pv .pa{height:8px;width:55%;border-radius:4px;background:var(--a)}
+.updc{border:1px solid var(--a-line);background:var(--a-soft);border-radius:14px;padding:14px;display:flex;gap:11px;font-size:12.5px;color:var(--text2)}
+.updc svg{color:var(--a-text);margin-top:1px}
+.updc b{display:block;color:var(--text);font-size:13px;margin-bottom:2px}
+.updc span{display:block}
+.updc button{margin-top:10px;padding:7px 12px;font-size:12.5px;width:100%}
+.updc button:empty{display:none}
+.sfoot .ver{display:block;font-style:normal;margin-top:6px;color:var(--faint);font-size:11.5px}
+.updrow{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
 #unsup{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;place-items:center;text-align:center;padding:30px}
 
 #split{width:14px;cursor:col-resize;position:relative;flex:none}
@@ -279,7 +287,8 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
 
 @media(max-width:1280px){
   #side{width:76px;padding:22px 12px 14px;align-items:center}
-  .brand{padding:0}.brand>div:last-child,.nav span,.nav .cnt,.sfoot div{display:none}
+  .brand{padding:0}.brand>div:last-child,.nav span,.nav .cnt,.sfoot div,.updc div{display:none}
+  .updc{padding:10px;justify-content:center;cursor:pointer}
   .nav{justify-content:center;padding:12px}
   .sfoot{padding:10px;justify-content:center}
   #toasts,#busy{left:calc(50% + 38px)}
@@ -290,7 +299,7 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
 @media(max-width:1520px){.popts .lbl{display:none}}
 @media(max-height:820px){#top{padding:14px 24px 0}.ttl h1{font-size:20px}.ttl p{display:none}.kpi{padding:5px 14px;flex-direction:row;align-items:baseline;gap:8px}.kpi b{font-size:19px}main{padding-top:10px}}
 @media(max-width:900px){
-  #app{flex-direction:column}#side{width:auto;flex-direction:row;padding:10px 14px;align-items:center}#side nav{flex-direction:row}.sfoot{display:none}
+  #app{flex-direction:column}#side{width:auto;flex-direction:row;padding:10px 14px;align-items:center}#side nav{flex-direction:row}.sfoot,.updc{display:none!important}
   body{overflow:auto}main{grid-template-columns:1fr!important;overflow:auto;gap:14px}#split{display:none}.pane{min-height:420px}.pinfo{width:150px}
   #toasts,#busy{left:50%}.kpis{margin-left:0}
 }
@@ -305,10 +314,11 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
     <button class="nav on" data-page="sort" title="Ranger les nouveaux morceaux"><svg class="i" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span>Ranger</span><em class="cnt" id="navTodo">0</em></button>
     <button class="nav" data-page="lib" title="Parcourir la bibliothèque en colonnes"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg><span>Bibliothèque</span><em class="cnt" id="navLib" style="display:none"></em></button>
     <button class="nav" id="expBtn" title="Exporter la playlist (.m3u8, .csv)"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Exporter la playlist</span></button>
-    <button class="nav" id="themeBtn" title="Couleurs et fond de l'interface"><svg class="i" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 4-4 4h-2.2a1.8 1.8 0 0 0-1.3 3.1A1.8 1.8 0 0 1 12 22z"/><circle cx="7.5" cy="10.5" r="1.2"/><circle cx="11" cy="6.8" r="1.2"/><circle cx="16" cy="7.8" r="1.2"/></svg><span>Apparence</span></button>
+    <button class="nav" id="themeBtn" title="Apparence et mises à jour"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Réglages</span></button>
     <button class="nav" id="helpBtn" title="Raccourcis clavier (?)"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span>Raccourcis</span></button>
   </nav>
-  <div class="sfoot" title="Tout fonctionne en local : aucun fichier ne quitte l'ordinateur"><svg class="i" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><b>100 % local</b>Rien n'est effacé : les rejets vont dans _Rejetes.</div></div>
+  <div class="updc" id="updCard" style="display:none"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><div><b id="updT"></b><span id="updS"></span><button class="primary" id="updGo"></button></div></div>
+  <div class="sfoot" title="Tout fonctionne en local : aucun fichier ne quitte l'ordinateur"><svg class="i" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><b>100 % local</b>Rien n'est effacé : les rejets vont dans _Rejetes.<em class="ver" id="appVer"></em></div></div>
 </aside>
 
 <div id="content">
@@ -438,13 +448,18 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
 
 <div class="modal" id="theme">
   <div class="card">
-    <h3>Apparence</h3>
-    <p class="mut" style="margin:0">Choisissez vos couleurs. Le changement est immédiat et mémorisé sur cet ordinateur.</p>
+    <h3>Réglages</h3>
+    <p class="mut" style="margin:0">Les changements sont immédiats et mémorisés sur cet ordinateur.</p>
     <h4>Couleur principale</h4>
     <div class="accs" id="accs"></div>
     <div class="accn" id="accN"></div>
     <h4>Fond</h4>
     <div class="bgs" id="bgs"></div>
+    <div id="updSet" style="display:none">
+      <h4>Mises à jour</h4>
+      <label class="sw"><input type="checkbox" id="updAuto" checked> Rechercher les mises à jour à chaque ouverture</label>
+      <div class="updrow"><button id="updNow">Rechercher maintenant</button><span class="mut" id="updInfo"></span></div>
+    </div>
     <div class="row"><button class="primary" id="thOk">Terminé</button><button class="ghost" id="thReset">Thème d'origine</button></div>
   </div>
 </div>
@@ -563,7 +578,33 @@ function renderTheme(){
   $('#accN').textContent=(ACCENTS.find(x=>x[0]===TH.a)||[,'Personnalisée'])[1]+' · '+TH.a.toUpperCase();
   $('#bgs').innerHTML=BGS.map(([id,n,sd,pn])=>`<button class="bgc${TH.bg===id?' on':''}" data-bg="${id}"><span class="pv" style="background:${pn}"><i class="ps" style="background:${sd}"></i><i class="pm"><i class="pc" style="background:${sd}"></i><i class="pa"></i></i></span><b>${n}</b></button>`).join('');
 }
-function openTheme(){renderTheme();$('#theme').style.display='grid'}
+function openTheme(){renderTheme();renderUpd();$('#theme').style.display='grid'}
+
+/* ---------- Mises à jour (application de bureau) ---------- */
+const UP={st:{state:'idle'},platform:''};
+function renderUpd(){
+  const s=UP.st,mac=UP.platform==='darwin',card=$('#updCard');
+  let t='',sub='',btn='';
+  if(s.state==='downloading'){t=`Mise à jour ${s.version||''}`;sub=`Téléchargement… ${s.percent||0} %`}
+  else if(s.state==='ready'){t=`Mise à jour ${s.version} prête`;sub='Elle s’installera au prochain redémarrage.';btn='Redémarrer maintenant'}
+  else if(s.state==='available'){t=`Nouvelle version ${s.version}`;sub=mac?'Téléchargez-la, puis glissez CrateSort dans Applications.':'Une nouvelle version est disponible.';btn='Télécharger'}
+  card.style.display=t?'':'none';card.title=t+(sub?' · '+sub:'');
+  $('#updT').textContent=t;$('#updS').textContent=sub;$('#updGo').textContent=btn;
+  const info={idle:'',checking:'Recherche en cours…',none:'Vous avez la dernière version.',dev:'Mode développement : pas de mise à jour.',
+    error:'Impossible de vérifier pour le moment (connexion ?).',downloading:sub,ready:t+'. '+sub,available:t+'.'}[s.state]||'';
+  $('#updInfo').textContent=info;
+}
+async function initUpdates(){
+  if(!NV||!NV.updCheck)return;
+  $('#updSet').style.display='';
+  $('#updAuto').checked=ls.get('cs.updAuto',true)!==false;
+  try{const i=await NV.appInfo();UP.platform=i.platform;$('#appVer').textContent='Version '+i.version}catch{}
+  NV.onUpd(st=>{const prev=UP.st.state;UP.st=st;renderUpd();
+    if(st.state==='ready'&&prev!=='ready')toast(`Mise à jour ${st.version} prête : elle s’installera au prochain redémarrage`,'','Redémarrer',()=>NV.updInstall(),12000);
+    else if(st.state==='available'&&prev!=='available')toast(`Nouvelle version ${st.version} disponible`,'','Télécharger',()=>NV.updInstall(),12000);});
+  try{UP.st=await NV.updState();renderUpd()}catch{}
+  if($('#updAuto').checked)setTimeout(()=>NV.updCheck(false),4000);
+}
 
 /* Pages de la barre latérale : « Ranger » (deux panneaux) ou « Bibliothèque » (colonnes en pleine largeur) */
 const PAGES={sort:['Ranger les nouveaux morceaux','Écoutez, choisissez un dossier, rangez en une touche.'],lib:['Bibliothèque','Parcourez vos dossiers en colonnes et écoutez les morceaux déjà rangés.']};
@@ -2097,6 +2138,10 @@ $('#accs').addEventListener('input',e=>{if(e.target.id!=='accPick')return;applyT
 $('#accs').addEventListener('change',e=>{if(e.target.id==='accPick')renderTheme()});
 $('#bgs').addEventListener('click',e=>{const b=e.target.closest('.bgc');if(b)applyTheme({a:TH.a,bg:b.dataset.bg},true)});
 $('#thOk').onclick=()=>closeModal($('#theme'));
+$('#updGo').onclick=()=>NV&&NV.updInstall();
+$('#updCard').addEventListener('click',e=>{if(!e.target.closest('button')&&innerWidth<=1280)openTheme()});
+$('#updNow').onclick=()=>{if(NV&&NV.updCheck){UP.st={state:'checking'};renderUpd();NV.updCheck(true)}};
+$('#updAuto').onchange=e=>ls.set('cs.updAuto',e.target.checked);
 $('#thReset').onclick=()=>applyTheme({},true);
 $('#helpBtn').onclick=()=>$('#help').style.display='grid';
 $('#tq').oninput=e=>{S.filter=e.target.value;renderTracks()};
@@ -2320,6 +2365,7 @@ document.addEventListener('keydown',e=>{
     if(h){S.saved[k]=h;if(await ensurePerm(h,false))await setHandle(k,h)}
   }
   renderTracks();renderFolders();renderChips();updateBar();
+  initUpdates();
 })();
 </script>
 </body>

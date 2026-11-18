@@ -26,7 +26,10 @@ jobs:
         include:
           - os: windows-latest
             script: build:win
-            fichiers: desktop/dist/CrateSort-Windows.exe
+            # latest.yml : sert aux mises à jour automatiques de l'app Windows
+            fichiers: |
+              desktop/dist/CrateSort-Windows.exe
+              desktop/dist/latest.yml
           - os: macos-latest
             script: build:mac
             fichiers: desktop/dist/CrateSort-Mac.dmg
