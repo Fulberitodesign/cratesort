@@ -5,8 +5,8 @@
   <key>CFBundleName</key><string>CrateSort</string>
   <key>CFBundleDisplayName</key><string>CrateSort</string>
   <key>CFBundleIdentifier</key><string>local.cratesort.launcher</string>
-  <key>CFBundleVersion</key><string>2.7</string>
-  <key>CFBundleShortVersionString</key><string>2.7</string>
+  <key>CFBundleVersion</key><string>2.8</string>
+  <key>CFBundleShortVersionString</key><string>2.8</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleExecutable</key><string>CrateSort</string>
   <key>CFBundleIconFile</key><string>CrateSort</string>

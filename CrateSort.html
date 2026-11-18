@@ -284,6 +284,14 @@ button.kpi.ser{border-color:var(--a-line);cursor:pointer}button.kpi.ser b{color:
 .serres ul{margin:8px 0;padding-left:18px}
 .serres .row{margin-top:12px}
 .serres.err{background:color-mix(in srgb,var(--err) 10%,transparent);border-color:color-mix(in srgb,var(--err) 40%,transparent)}
+.serf{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.serf div{display:flex;align-items:center;gap:8px;font-size:13px;background:var(--input);border:1px solid var(--line);border-radius:10px;padding:7px 10px;color:var(--text2)}
+.serf div span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.serf div em{font-style:normal;color:var(--muted);font-size:11.5px}
+.serf button{padding:2px 8px;font-size:12px;background:transparent;border:0;color:var(--muted)}
+.serf button:hover{color:var(--err)}
+.repx{font-size:12px;color:var(--muted);margin:8px 0;display:grid;gap:3px}
+.repx code{color:var(--text2);word-break:break-all}
 #unsup{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;place-items:center;text-align:center;padding:30px}
 
 #split{width:14px;cursor:col-resize;position:relative;flex:none}
@@ -509,6 +517,11 @@ body.pg-lib main{grid-template-columns:minmax(0,1fr)!important}
     <p class="mut" id="serWhere" style="margin:14px 0 0;font-size:12.5px"></p>
     <div class="row"><button class="primary" id="serGo">Mettre à jour Serato</button><button class="ghost" id="serClose">Fermer</button></div>
     <div class="serres" id="serRes" style="display:none"></div>
+    <h4 style="margin-top:26px">Morceaux introuvables</h4>
+    <p class="mut" style="margin:0;font-size:13px">Des morceaux sont introuvables dans Serato parce qu’ils ont été déplacés ? CrateSort les retrouve dans vos dossiers et corrige Serato, crates comprises.</p>
+    <div class="serf" id="serFolders"></div>
+    <div class="row" style="margin-top:10px"><button id="repAdd">＋ Ajouter un dossier (ex. votre disque externe)</button><button id="repScan">Rechercher les morceaux introuvables</button></div>
+    <div class="serres" id="repRes" style="display:none"></div>
   </div>
 </div>
 
@@ -670,7 +683,7 @@ function serRender(){
 }
 async function openSerato(){
   if(!serOn())return;
-  $('#serRes').style.display='none';$('#serato').style.display='grid';
+  $('#serRes').style.display='none';$('#repRes').style.display='none';repRenderFolders();$('#serato').style.display='grid';
   const md=ls.get('cs.serato.mode','folders');document.querySelector(`input[name=serMode][value=${md}]`).checked=true;
   $('#serName').value=ls.get('cs.serato.name','Nouveaux morceaux');
   serRender();
@@ -707,6 +720,60 @@ async function runSerato(){
   }
   SER.busy=false;$('#serGo').textContent='Mettre à jour Serato';$('#serAll').checked=false;serRender();updSerCounts();
 }
+/* ----- Réparer les morceaux introuvables ----- */
+const REP={busy:false,res:null,last:null};
+function repFolders(){
+  const out=[];if(S.lib&&S.lib.path)out.push({p:S.lib.path,l:'Bibliothèque'});if(S.inbox&&S.inbox.path)out.push({p:S.inbox.path,l:'Téléchargements'});
+  for(const p of ls.get('cs.serato.extra',[]))if(!out.some(o=>o.p===p))out.push({p,l:'Ajouté',x:1});
+  return out;
+}
+function repRenderFolders(){
+  $('#serFolders').innerHTML='<span class="mut" style="font-size:12.5px">Dossiers où chercher :</span>'+repFolders().map(f=>`<div><span title="${esc(f.p)}">${esc(f.p)}</span><em>${f.l}</em>${f.x?`<button data-rm="${esc(f.p)}" title="Retirer">✕</button>`:''}</div>`).join('');
+}
+async function repScan(){
+  if(REP.busy)return;REP.busy=true;const box=$('#repRes');box.className='serres';box.style.display='';
+  box.innerHTML='<b>Recherche en cours…</b>CrateSort parcourt vos dossiers. Cela peut prendre une minute sur un gros disque.';
+  $('#repScan').disabled=true;
+  try{
+    const r=await nv('seratoScan',{folders:repFolders().map(f=>f.p)});REP.res=r;
+    const ex=r.examples.map(e=>`<div><code>${esc(e.from.split(/[\\/]/).pop())}</code> → <code>${esc(e.to)}</code></div>`).join('');
+    box.innerHTML=r.total?`<b>${r.total} morceau${r.total>1?'x':''} introuvable${r.total>1?'s':''} dans Serato</b>`
+      +`✓ <strong>${r.found}</strong> retrouvé${r.found>1?'s':''}`+(r.ambiguous?` · ${r.ambiguous} à vérifier (plusieurs fichiers possibles)`:'')+(r.notFound?` · ${r.notFound} toujours introuvable${r.notFound>1?'s':''}`:'')
+      +`<div class="repx">${ex}${r.found>r.examples.length?`<span>… et ${r.found-r.examples.length} autres</span>`:''}</div>`
+      +`<div class="row">${r.found?`<button class="primary" id="repGo">Réparer ${r.found} morceau${r.found>1?'x':''}</button>`:''}${r.notFound+r.ambiguous?'<button id="repCsv">Exporter la liste des introuvables</button>':''}</div>`
+      +(r.notFound?'<div class="mut" style="margin-top:8px;font-size:12px">Pour les morceaux toujours introuvables : ajoutez le dossier où ils se trouvent, ou exportez la liste pour les racheter.</div>':'')
+      :`<b>Aucun morceau introuvable</b>Les ${r.checked} morceaux de Serato sont bien à leur place.`;
+  }catch(e){box.className='serres err';box.innerHTML=`<b>Recherche impossible</b>${esc(e.message)}`}
+  REP.busy=false;$('#repScan').disabled=false;
+}
+async function repGo(){
+  if(REP.busy)return;REP.busy=true;const box=$('#repRes'),b=$('#repGo');if(b){b.disabled=true;b.textContent='Réparation en cours…'}
+  try{
+    const r=await nv('seratoRepair');REP.last=r.backups;ls.set('cs.serato.repBackups',r.backups);
+    box.className='serres';box.innerHTML=`<b>${r.repaired} morceau${r.repaired>1?'x':''} réparé${r.repaired>1?'s':''}</b>`
+      +(r.otherDisk?`${r.otherDisk} rattaché${r.otherDisk>1?'s':''} au disque où ${r.otherDisk>1?'ils se trouvent':'il se trouve'} maintenant (crates comprises)`:'')+(r.otherDisk&&r.sameDisk?' · ':'')+(r.sameDisk?`${r.sameDisk} corrigé${r.sameDisk>1?'s':''} sur le même disque`:'')
+      +`. Ouvrez Serato pour vérifier.<div class="mut" style="margin-top:6px">Sauvegarde : ${esc(r.backups.join(', '))}</div><div class="row"><button id="repUndo">Annuler les changements</button></div>`;
+    toast(`${r.repaired} morceau${r.repaired>1?'x':''} réparé${r.repaired>1?'s':''} dans Serato`,'',null,null,4500);
+  }catch(e){box.className='serres err';box.innerHTML=`<b>Réparation impossible</b>${esc(e.message)}`+(/ouvert/i.test(e.message)?'<div class="row"><button id="repGo">Réessayer</button></div>':'')}
+  REP.busy=false;
+}
+async function repUndo(){
+  const b=REP.last||ls.get('cs.serato.repBackups',null);if(!b)return;
+  try{await nv('seratoUndo',b);REP.last=null;ls.set('cs.serato.repBackups',null);$('#repRes').innerHTML='<b>Réparation annulée</b>Serato est revenu à son état d’avant la réparation.';toast('Réparation annulée','',null,null,3500)}
+  catch(e){toast('Annulation impossible : '+e.message,'err')}
+}
+function repCsv(){
+  const r=REP.res;if(!r)return;const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[['État','Fichier','Ancien emplacement dans Serato']];
+  r.notFoundList.forEach(p=>rows.push(['Introuvable',p.split(/[\\/]/).pop(),p]));
+  r.ambiguousList.forEach(p=>rows.push(['Plusieurs fichiers possibles',p.split(/[\\/]/).pop(),p]));
+  download('CrateSort-morceaux-introuvables.csv','﻿'+rows.map(x=>x.map(q).join(';')).join('\r\n'),'text/csv');
+}
+$('#repScan').onclick=repScan;
+$('#repAdd').onclick=async()=>{try{const r=await nv('pickFolder');if(r&&r.p){const x=ls.get('cs.serato.extra',[]);if(!x.includes(r.p))x.push(r.p);ls.set('cs.serato.extra',x);repRenderFolders()}}catch(e){toast(e.message,'err')}};
+$('#serFolders').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;ls.set('cs.serato.extra',ls.get('cs.serato.extra',[]).filter(p=>p!==b.dataset.rm));repRenderFolders()});
+$('#repRes').addEventListener('click',e=>{if(e.target.id==='repGo')repGo();else if(e.target.id==='repUndo')repUndo();else if(e.target.id==='repCsv')repCsv()});
+
 async function undoSerato(){
   const b=SER.last||ls.get('cs.serato.lastBackups',null);if(!b)return;
   try{await nv('seratoUndo',b);ls.set(serKey(),0);ls.set('cs.serato.lastBackups',null);SER.last=null;

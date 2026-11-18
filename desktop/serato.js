@@ -196,4 +196,102 @@ async function undo(backups) {
   return { ok: true };
 }
 
-module.exports = { status, sync, undo, volumeOf, _test: { records, join, u16, str, trackPath } };
+/* ---------- Réparer les morceaux introuvables (comme Relink) ----------
+   1. on repère, dans chaque _Serato_ concerné, les morceaux dont le fichier n'existe plus ;
+   2. on les cherche par nom (puis par taille exacte, champ ufsb) dans les dossiers indiqués ;
+   3. on corrige : même disque → nouveau chemin dans la base et les crates ;
+      autre disque → le morceau (avec toutes ses infos) passe dans le _Serato_ de ce disque,
+      ainsi que ses crates. */
+function rootOf(seratoDir) {
+  const v = volumeOf(path.join(path.dirname(seratoDir), 'x'));
+  return path.resolve(v.serato) === path.resolve(seratoDir) ? v.root : (process.platform === 'win32' ? path.parse(seratoDir).root : '/');
+}
+const AUDIO = /\.(mp3|wav|aiff?|flac|m4a|aac|ogg|alac|mp4)$/i;
+const SKIPDIR = /^(\.|_Serato_|\$RECYCLE\.BIN$|System Volume Information$|node_modules$)/i;
+async function indexFolders(dirs, limit = 300000) {
+  const byName = new Map(); let n = 0;
+  async function walk(d, depth) {
+    if (n > limit || depth > 14) return;
+    let ents; try { ents = await fsp.readdir(d, { withFileTypes: true }); } catch (e) { return; }
+    for (const e of ents) {
+      if (SKIPDIR.test(e.name)) continue;
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) await walk(p, depth + 1);
+      else if (e.isFile() && AUDIO.test(e.name)) { n++; const k = e.name.toLowerCase(); if (!byName.has(k)) byName.set(k, []); byName.get(k).push(p); }
+    }
+  }
+  for (const d of [...new Set(dirs.map(x => path.resolve(x)))]) await walk(d, 0);
+  return { byName, files: n };
+}
+function fieldOf(otrk, tag) { const f = records(otrk.data).find(r => r.tag === tag); return f || null; }
+async function exists(p) { try { await fsp.access(p); return true; } catch (e) { return false; } }
+
+async function scanMissing({ folders }) {
+  const dirs = new Set([volumeOf(path.join(os.homedir(), 'x')).serato]);
+  for (const f of folders) dirs.add(volumeOf(f).serato);
+  const idx = await indexFolders(folders), plan = [], notFound = [], ambiguous = [];
+  let total = 0, checked = 0;
+  for (const dir of dirs) {
+    if (!(await exists(path.join(dir, 'database V2')))) continue;
+    const db = await loadDb(dir), root = rootOf(dir);
+    for (let i = 0; i < db.recs.length; i++) {
+      const r = db.recs[i]; if (r.tag !== 'otrk') continue;
+      const rel = trackPath(r, 'pfil'); if (!rel) continue; checked++;
+      if (await exists(path.join(root, rel))) continue;
+      total++;
+      const name = rel.split(/[\\/]/).pop(), cands = idx.byName.get(name.toLowerCase()) || [];
+      let pick = null;
+      if (cands.length === 1) pick = cands[0];
+      else if (cands.length > 1) {
+        const f = fieldOf(r, 'ufsb'), size = f && f.data.length === 4 ? f.data.readUInt32BE(0) : 0, same = [];
+        if (size) for (const c of cands) { try { if ((await fsp.stat(c)).size === size) same.push(c); } catch (e) {} }
+        if (same.length === 1) pick = same[0]; else { ambiguous.push({ rel, n: cands.length }); continue; }
+      }
+      if (pick) plan.push({ dir, rel, abs: pick }); else notFound.push(rel);
+    }
+  }
+  return { checked, total, plan, ambiguous, notFound, files: idx.files, seratoDirs: [...dirs] };
+}
+
+async function repair(plan) {
+  if (await seratoRunning()) { const e = new Error('Serato est ouvert : fermez-le, puis relancez la réparation.'); e.code = 'SERATO_OPEN'; throw e; }
+  const cache = new Map();
+  const open = async dir => { if (!cache.has(dir)) { const db = await loadDb(dir), crates = await loadCrates(dir); cache.set(dir, { dir, db, crates, sep: sepOf(db), dbDirty: false, created: [], backup: null }); } return cache.get(dir); };
+  // tous les _Serato_ touchés sont sauvegardés avant la moindre écriture
+  for (const it of plan) { await open(it.dir); await open(volumeOf(it.abs).serato); }
+  for (const c of cache.values()) c.backup = await backup(c.dir, c.crates);
+  const header = crates => crateHeader(crates);
+  let same = 0, moved = 0, already = 0;
+  for (const it of plan) {
+    const src = cache.get(it.dir), dstVol = volumeOf(it.abs), dst = cache.get(dstVol.serato);
+    const i = src.db.recs.findIndex(r => r.tag === 'otrk' && trackPath(r, 'pfil') === it.rel); if (i < 0) continue;
+    const newRel = relOf(it.abs, dstVol, dst.sep);
+    const fix = r => { let fs2 = records(r.data).map(f => f.tag === 'pfil' ? { tag: 'pfil', data: u16(newRel) } : f.tag === 'bmis' ? { tag: 'bmis', data: byte(0) } : f); return { tag: 'otrk', data: join(fs2) }; };
+    const retarget = (crates, oldRel, nr) => { for (const c of crates.values()) c.recs = c.recs.map(r => { if (r.tag !== 'otrk') return r; const p = trackPath(r, 'ptrk'); if (p === oldRel) { c.dirty = true; return setTrackPath(r, 'ptrk', nr); } return r; }); };
+    if (dst === src) { src.db.recs[i] = fix(src.db.recs[i]); src.dbDirty = true; retarget(src.crates, it.rel, newRel); same++; continue; }
+    // autre disque : le morceau passe dans le _Serato_ de ce disque, avec ses infos
+    const known = dst.db.recs.some(r => r.tag === 'otrk' && (trackPath(r, 'pfil') || '').toLowerCase() === newRel.toLowerCase());
+    if (!known) { dst.db.recs.push(fix(src.db.recs[i])); dst.dbDirty = true; } else already++;
+    src.db.recs.splice(i, 1); src.dbDirty = true;
+    for (const [name, c] of src.crates) {
+      if (!c.recs.some(r => r.tag === 'otrk' && trackPath(r, 'ptrk') === it.rel)) continue;
+      c.recs = c.recs.filter(r => !(r.tag === 'otrk' && trackPath(r, 'ptrk') === it.rel)); c.dirty = true;
+      let dc = dst.crates.get(name);
+      if (!dc) {
+        const segs = name.split('%%');
+        for (let k = 1; k <= segs.length; k++) { const n2 = segs.slice(0, k).join('%%'); if (!dst.crates.has(n2)) { dst.crates.set(n2, { file: path.join(dst.dir, 'Subcrates', n2 + '.crate'), recs: header(dst.crates).slice(), dirty: true, created: true }); dst.created.push(n2 + '.crate'); } }
+        dc = dst.crates.get(name);
+      }
+      if (!dc.recs.some(r => r.tag === 'otrk' && trackPath(r, 'ptrk') === newRel)) { dc.recs.push({ tag: 'otrk', data: join([{ tag: 'ptrk', data: u16(newRel) }]) }); dc.dirty = true; }
+    }
+    moved++;
+  }
+  for (const c of cache.values()) {
+    if (c.dbDirty) await safeWrite(c.db.file, join(c.db.recs));
+    for (const k of c.crates.values()) if (k.dirty) await safeWrite(k.file, join(k.recs));
+    await fsp.writeFile(path.join(c.backup, 'cratesort.json'), JSON.stringify({ serato: c.dir, created: c.created, date: new Date().toISOString(), action: 'réparation' }, null, 1));
+  }
+  return { repaired: same + moved, sameDisk: same, otherDisk: moved, already, backups: [...cache.values()].map(c => c.backup) };
+}
+
+module.exports = { status, sync, undo, scanMissing, repair, volumeOf, _test: { records, join, u16, str, trackPath, indexFolders } };

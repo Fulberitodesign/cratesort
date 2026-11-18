@@ -120,11 +120,29 @@ async function checkUpdates(manual){
   return{...UPD};
 }
 /* Serato : uniquement pour des morceaux situés dans les dossiers choisis par l'utilisateur */
+let repairPlan=null;
 Object.assign(H,{
   async seratoStatus(lib){return serato.status(dirOk(lib))},
   async seratoSync(o){
     const items=(o&&o.items||[]).filter(it=>typeof it.dst==='string'&&inside(it.dst));
     return serato.sync({items,mode:o.mode==='single'?'single':'folders',single:String(o.single||'').slice(0,80)});
+  },
+  /* Morceaux introuvables : la recherche garde le plan en mémoire ; la réparation n'accepte que ce plan */
+  async seratoScan(o){
+    const folders=(o&&o.folders||[]).filter(f=>typeof f==='string'&&inside(f)).map(f=>path.resolve(f));
+    const r=await serato.scanMissing({folders});repairPlan=r.plan;
+    return{checked:r.checked,total:r.total,found:r.plan.length,ambiguous:r.ambiguous.length,notFound:r.notFound.length,files:r.files,
+      examples:r.plan.slice(0,6).map(p=>({from:p.rel,to:p.abs})),notFoundList:r.notFound.slice(0,5000),ambiguousList:r.ambiguous.slice(0,2000).map(a=>a.rel)};
+  },
+  async seratoRepair(){
+    if(!repairPlan||!repairPlan.length)throw Object.assign(new Error('Relancez d’abord la recherche.'),{code:'NOPLAN'});
+    const r=await serato.repair(repairPlan);repairPlan=null;return r;
+  },
+  async pickFolder(){
+    const r=await dialog.showOpenDialog(win,{title:'Dossier où chercher les morceaux (par exemple votre disque externe)',buttonLabel:'Choisir',properties:['openDirectory']});
+    if(r.canceled||!r.filePaths[0])return null;
+    const p=path.resolve(r.filePaths[0]);if(!roots.includes(p)){roots.push(p);saveRoots()}
+    return{p,name:path.basename(p)||p};
   },
   async seratoUndo(list){
     const ok=(list||[]).filter(b=>typeof b==='string'&&path.basename(path.dirname(path.resolve(b)))==='_Serato_Backup_CrateSort');

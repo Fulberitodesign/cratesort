@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('csNative',{
   move:(sd,n,dd,nn)=>call('move',sd,n,dd,nn),remove:(d,n)=>call('remove',d,n),url:(d,n)=>call('url',d,n),
   appInfo:()=>call('appInfo'),updCheck:m=>call('updCheck',!!m),updState:()=>call('updState'),updInstall:()=>call('updInstall'),updManual:()=>call('updManual'),
   onUpd:cb=>{ipcRenderer.on('upd:status',(e,st)=>cb(st))},
-  seratoStatus:l=>call('seratoStatus',l),seratoSync:o=>call('seratoSync',o),seratoUndo:b=>call('seratoUndo',b)
+  seratoStatus:l=>call('seratoStatus',l),seratoSync:o=>call('seratoSync',o),seratoUndo:b=>call('seratoUndo',b),
+  seratoScan:o=>call('seratoScan',o),seratoRepair:()=>call('seratoRepair'),pickFolder:()=>call('pickFolder')
 });
