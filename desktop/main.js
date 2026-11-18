@@ -1,6 +1,8 @@
 const {app,BrowserWindow,Menu,session,shell,dialog,ipcMain,net}=require('electron');
 const path=require('path'),fs=require('fs'),fsp=fs.promises,{pathToFileURL}=require('url');
-const serato=require('./serato');
+const serato=require('./serato'),macupd=require('./macupdate');
+/* Autotest (utilisé par GitHub Actions après une mise à jour) : l'app démarre, affiche sa version et quitte */
+const AUTOTEST=process.argv.includes('--cratesort-autotest');
 
 /* ---------- Accès disque natif ----------
    Le moteur web masque certains noms (? " * | < > : …). L'application lit donc le disque directement,
@@ -102,15 +104,18 @@ function winUpdater(){
 }
 async function checkUpdates(manual){
   if(!app.isPackaged){setUpd({state:'dev',manual:!!manual});return{...UPD}}
-  if(['checking','downloading','ready'].includes(UPD.state))return{...UPD};
+  if(['checking','downloading','ready','installing','restarting'].includes(UPD.state))return{...UPD};
   setUpd({state:'checking',manual:!!manual,error:null});
   try{
     if(process.platform==='win32'){await winUpdater().checkForUpdates();return{...UPD}}
     const r=await net.fetch(`https://api.github.com/repos/${REPO}/releases/latest`,{headers:{Accept:'application/vnd.github+json','User-Agent':'CrateSort'}});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const rel=await r.json();
-    if(rel.tag_name&&newer(rel.tag_name,app.getVersion()))setUpd({state:'available',version:String(rel.tag_name).replace(/^v/,'')});
-    else setUpd({state:'none'});
+    if(rel.tag_name&&newer(rel.tag_name,app.getVersion())){
+      const a=(rel.assets||[]).find(x=>x.name==='CrateSort-Mac.dmg');
+      UPD.asset=a?{url:a.browser_download_url,size:a.size}:null;
+      setUpd({state:'available',version:String(rel.tag_name).replace(/^v/,''),mac:process.platform==='darwin'&&!!a});
+    }else setUpd({state:'none'});
   }catch(e){setUpd({state:'error',error:String(e&&e.message||e).slice(0,200)})}
   return{...UPD};
 }
@@ -132,10 +137,40 @@ Object.assign(H,{
   async updState(){return{...UPD}},
   async updInstall(){
     if(UPD.state==='ready'&&updater){setImmediate(()=>updater.quitAndInstall(true,true));return{ok:true}}
-    if(UPD.state==='available'){await shell.openExternal(`https://github.com/${REPO}/releases/latest/download/CrateSort-Mac.dmg`);return{ok:true}}
+    if(process.platform==='darwin'&&UPD.asset&&['available','error'].includes(UPD.state))return macInstall();
+    if(UPD.state==='available')return H.updManual();
     return{ok:false};
-  }
+  },
+  async updManual(){await shell.openExternal(`https://github.com/${REPO}/releases/latest/download/CrateSort-Mac.dmg`);return{ok:true}}
 });
+/* Mac : téléchargement, installation et redémarrage automatiques (voir macupdate.js) */
+let macBusy=false;
+async function macInstall(){
+  if(macBusy)return{ok:false};macBusy=true;
+  const v=UPD.version,asset=UPD.asset;
+  try{
+    const bundle=macupd.bundleOf(app.getPath('exe')),loc=await macupd.checkLocation(bundle);
+    if(!loc.ok){
+      const msg={dmg:'CrateSort est ouvert depuis le fichier .dmg. Glissez CrateSort dans le dossier Applications, ouvrez-le depuis Applications, puis relancez la mise à jour.',
+        translocation:'Glissez d’abord CrateSort dans le dossier Applications, ouvrez-le depuis Applications, puis relancez la mise à jour.',
+        readonly:'Le dossier où se trouve CrateSort n’est pas modifiable. Glissez CrateSort dans Applications, puis relancez la mise à jour.',
+        dev:'Mode développement : pas de mise à jour.'}[loc.reason];
+      setUpd({state:'error',code:loc.reason,error:msg});return{ok:false};
+    }
+    setUpd({state:'downloading',percent:0,error:null,code:null});
+    const dmg=path.join(app.getPath('home'),'Library','Caches','CrateSort',`CrateSort-${v}.dmg`);
+    await macupd.download(asset.url,dmg,asset.size,pc=>setUpd({state:'downloading',percent:pc}),net.fetch.bind(net));
+    setUpd({state:'installing',percent:100});
+    const newApp=await macupd.prepare({dmg,bundle,version:v});
+    await macupd.launchSwap({pid:process.pid,bundle,newApp});
+    fsp.rm(dmg,{force:true}).catch(()=>{});
+    setUpd({state:'restarting'});
+    setTimeout(()=>app.quit(),600);
+    return{ok:true};
+  }catch(e){
+    setUpd({state:'error',code:'install',error:String(e&&e.message||e).slice(0,300)});return{ok:false};
+  }finally{macBusy=false}
+}
 for(const [k,fn] of Object.entries(H))ipcMain.handle('fs:'+k,async(e,...a)=>{
   if(!e.senderFrame||!e.senderFrame.url.startsWith('file:'))return{err:{code:'EACCES',msg:'origine refusée'}};
   try{return await fn(...a)}catch(x){return{err:{code:x.code||'EUNKNOWN',msg:String(x.message||x)}}}
@@ -168,6 +203,7 @@ const menu=Menu.buildFromTemplate([
 ]);
 
 app.whenReady().then(()=>{
+  if(AUTOTEST){console.log('CRATESORT_OK '+app.getVersion());app.exit(0);return}
   loadRoots();
   Menu.setApplicationMenu(process.platform==='darwin'?menu:null); // Windows : copier/coller fonctionnent sans menu
   app.setAboutPanelOptions({applicationName:'CrateSort',applicationVersion:app.getVersion(),credits:'Rangement de morceaux pour DJ'});

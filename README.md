@@ -19,14 +19,14 @@ Site et blog : [fulberitodesign.github.io/cratesort](https://fulberitodesign.git
 
 Ces avertissements viennent de ce que l'application n'est pas signée par Apple ou Microsoft.
 
-À partir de la version 2.3, plus besoin de revenir ici : CrateSort vous prévient lui-même des nouvelles versions (sur Windows, il se met à jour tout seul au redémarrage).
+À partir de la version 2.3, plus besoin de revenir ici : CrateSort vous prévient lui-même des nouvelles versions. Sur Windows il se met à jour tout seul au redémarrage ; sur Mac, depuis la 2.7, un clic sur « Mettre à jour » suffit.
 
 ## Fonctionnalités
 
 - **Nouvelle interface (2.2)** : barre latérale avec deux pages, « Ranger » (téléchargements + bibliothèque côte à côte) et « Bibliothèque » (pleine largeur), compteurs « à ranger », « rangés » et « doublons ».
 - **Bibliothèque en colonnes** (style Finder, affichage par défaut) : Dossier › Sous-dossier › Sous-dossier 1 › Sous-dossier 2…, avec fil d'Ariane cliquable et écoute des morceaux déjà rangés. L'arborescence reste disponible. Largeur des colonnes réglable à la main (glisser le bord, double-clic pour ajuster au contenu, Alt+glisser pour toutes), mémorisée ; bouton « Largeur auto » pour revenir au réglage automatique.
 - **Mettre à jour Serato (2.6)** : un bouton, toujours visible et utilisable à tout moment, envoie dans Serato les morceaux rangés depuis la dernière mise à jour. CrateSort les ajoute à la base Serato, crée ou complète les crates qui suivent vos dossiers (ou une crate unique), répare le chemin des morceaux déjà connus de Serato, vérifie que Serato est fermé et fait une sauvegarde avant chaque mise à jour (bouton « Annuler les changements »). Application de bureau uniquement.
-- **Mises à jour automatiques (2.3)** : sur Windows, la nouvelle version se télécharge en arrière-plan et s'installe au redémarrage. Sur Mac, CrateSort signale la nouvelle version et propose de télécharger le `.dmg`. Désactivable dans Réglages.
+- **Mises à jour automatiques** : sur Windows, la nouvelle version se télécharge en arrière-plan et s'installe au redémarrage. Sur Mac (2.7), un clic sur « Mettre à jour » télécharge la nouvelle version, la vérifie, la met en place et rouvre CrateSort, sans repasser par le navigateur ni par « Ouvrir quand même ». Désactivable dans Réglages.
 - **Apparence au choix** : 9 couleurs principales ou une couleur personnalisée, et 4 fonds (Sombre, Noir, Nuit, Clair). Le choix est mémorisé.
 - **Visite guidée (2.5)** : au premier lancement, une visite en 10 étapes montre comment choisir ses dossiers, écouter et ranger. Relançable à tout moment depuis « Visite guidée ».
 - **Écoute rapide** : forme d'onde cliquable, ←/→ ±10 s, détection automatique du drop (touche D), départ au drop, enchaînement automatique.

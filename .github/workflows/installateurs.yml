@@ -47,6 +47,10 @@ jobs:
       - name: Construire
         working-directory: desktop
         run: npm run ${{ matrix.script }}
+      - name: Tester une vraie mise à jour (Mac)
+        if: runner.os == 'macOS'
+        working-directory: desktop
+        run: node scripts/test-maj-mac.js dist/CrateSort-Mac.dmg
       - uses: actions/upload-artifact@v4
         with:
           name: installateur-${{ matrix.os }}
