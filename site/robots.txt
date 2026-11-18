@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fulberitodesign.github.io/cratesort/sitemap.xml
